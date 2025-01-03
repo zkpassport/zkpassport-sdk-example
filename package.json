@@ -13,7 +13,7 @@
     "react": "19.0.0-rc-66855b96-20241106",
     "react-dom": "19.0.0-rc-66855b96-20241106",
     "react-qr-code": "^2.0.15",
-    "zkpassport-sdk": "github:zkpassport/zkpassport-sdk"
+    "@zkpassport/sdk": "^0.1.2"
   },
   "devDependencies": {
     "@types/node": "^20",

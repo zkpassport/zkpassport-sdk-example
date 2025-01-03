@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { ZkPassport, ProofResult, EU_COUNTRIES } from "zkpassport-sdk";
+import { ZkPassport, ProofResult, EU_COUNTRIES } from "@zkpassport/sdk";
 import QRCode from "react-qr-code";
 
 export default function Home() {
