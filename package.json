@@ -1,6 +1,7 @@
 {
   "name": "zkpassport-sdk-example",
   "version": "0.1.0",
+  "type": "module",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -13,7 +14,7 @@
     "react": "19.0.0-rc-66855b96-20241106",
     "react-dom": "19.0.0-rc-66855b96-20241106",
     "react-qr-code": "^2.0.15",
-    "@zkpassport/sdk": "^0.1.2"
+    "@zkpassport/sdk": "^0.2.0"
   },
   "devDependencies": {
     "@types/node": "^20",

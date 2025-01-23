@@ -1,20 +1,21 @@
 "use client";
 import { useState } from "react";
-import { ZkPassport, ProofResult, EU_COUNTRIES } from "@zkpassport/sdk";
+import { ZKPassport, ProofResult, EU_COUNTRIES } from "@zkpassport/sdk";
 import QRCode from "react-qr-code";
 
 export default function Home() {
   const [message, setMessage] = useState("");
   const [firstName, setFirstName] = useState("");
-  const [isEUCitizen, setIsEUCitizen] = useState<boolean | undefined>(
-    undefined
-  );
+  const [isEUCitizen, setIsEUCitizen] = useState<boolean | undefined>(undefined);
+  const [isOver18, setIsOver18] = useState<boolean | undefined>(undefined);
   const [queryUrl, setQueryUrl] = useState("");
+  const [uniqueIdentifier, setUniqueIdentifier] = useState("");
+  const [verified, setVerified] = useState<boolean | undefined>(undefined);
   const [requestInProgress, setRequestInProgress] = useState(false);
 
-  let zkPassport: ZkPassport | null = null;
+  let zkPassport: ZKPassport | null = null;
   if (typeof window !== "undefined") {
-    zkPassport = new ZkPassport(window.location.hostname);
+    zkPassport = new ZKPassport(window.location.hostname);
   }
 
   const createRequest = async () => {
@@ -25,31 +26,33 @@ export default function Home() {
     setIsEUCitizen(undefined);
     setMessage("");
     setQueryUrl("");
+    setIsOver18(undefined);
+    setUniqueIdentifier("");
+    setVerified(undefined);
 
     const queryBuilder = await zkPassport.request({
       name: "ZKPassport",
       logo: "https://zkpassport.id/favicon.png",
       purpose: "Proof of EU citizenship and firstname",
+      scope: "eu-adult",
     });
 
     const {
       url,
-      onQRCodeScanned,
+      onRequestReceived,
       onGeneratingProof,
       onProofGenerated,
+      onResult,
       onReject,
       onError,
-    } = queryBuilder
-      .in("nationality", EU_COUNTRIES)
-      .disclose("firstname")
-      .done();
+    } = queryBuilder.in("nationality", EU_COUNTRIES).disclose("firstname").gte("age", 18).done();
 
     setQueryUrl(url);
     console.log(url);
 
     setRequestInProgress(true);
 
-    onQRCodeScanned(() => {
+    onRequestReceived(() => {
       console.log("QR code scanned");
       setMessage("Request received");
     });
@@ -59,11 +62,20 @@ export default function Home() {
       setMessage("Generating proof...");
     });
 
-    onProofGenerated(async (result: ProofResult) => {
+    onProofGenerated((result: ProofResult) => {
+      console.log("Proof result", result);
+      setMessage(`Proofs received`);
+      setRequestInProgress(false);
+    });
+
+    onResult(({ result, uniqueIdentifier, verified }) => {
       console.log("Result of the query", result);
-      setFirstName(result?.queryResult.firstname?.disclose?.result);
-      setIsEUCitizen(result?.queryResult.nationality?.in?.result);
-      setMessage("Proof generated");
+      setFirstName(result?.firstname?.disclose?.result);
+      setIsEUCitizen(result?.nationality?.in?.result);
+      setIsOver18(result?.age?.gte?.result);
+      setMessage("Result received");
+      setUniqueIdentifier(uniqueIdentifier || "");
+      setVerified(verified);
       setRequestInProgress(false);
     });
 
@@ -92,6 +104,22 @@ export default function Home() {
       {typeof isEUCitizen === "boolean" && (
         <p className="mt-2">
           <b>Is EU citizen:</b> {isEUCitizen ? "Yes" : "No"}
+        </p>
+      )}
+      {typeof isOver18 === "boolean" && (
+        <p className="mt-2">
+          <b>Is over 18:</b> {isOver18 ? "Yes" : "No"}
+        </p>
+      )}
+      {uniqueIdentifier && (
+        <p className="mt-2">
+          <b>Unique identifier:</b>
+        </p>
+      )}
+      {uniqueIdentifier && <p>{uniqueIdentifier}</p>}
+      {verified !== undefined && (
+        <p className="mt-2">
+          <b>Verified:</b> {verified ? "Yes" : "No"}
         </p>
       )}
       {!requestInProgress && (
