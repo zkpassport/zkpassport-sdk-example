@@ -45,7 +45,12 @@ export default function Home() {
       onResult,
       onReject,
       onError,
-    } = queryBuilder.in("nationality", EU_COUNTRIES).disclose("firstname").gte("age", 18).done();
+    } = queryBuilder
+      .in("nationality", EU_COUNTRIES)
+      .disclose("firstname")
+      .gte("age", 18)
+      .disclose("document_type")
+      .done();
 
     setQueryUrl(url);
     console.log(url);
