@@ -73,8 +73,9 @@ export default function Home() {
       setRequestInProgress(false);
     });
 
-    onResult(({ result, uniqueIdentifier, verified }) => {
+    onResult(({ result, uniqueIdentifier, verified, queryResultErrors }) => {
       console.log("Result of the query", result);
+      console.log("Query result errors", queryResultErrors);
       setFirstName(result?.firstname?.disclose?.result);
       setIsEUCitizen(result?.nationality?.in?.result);
       setIsOver18(result?.age?.gte?.result);
