@@ -67,13 +67,16 @@ export default function Home() {
       setMessage("Generating proof...");
     });
 
+    const proofs: ProofResult[] = [];
+
     onProofGenerated((result: ProofResult) => {
       console.log("Proof result", result);
+      proofs.push(result);
       setMessage(`Proofs received`);
       setRequestInProgress(false);
     });
 
-    onResult(({ result, uniqueIdentifier, verified, queryResultErrors }) => {
+    onResult(async ({ result, uniqueIdentifier, verified, queryResultErrors }) => {
       console.log("Result of the query", result);
       console.log("Query result errors", queryResultErrors);
       setFirstName(result?.firstname?.disclose?.result);
@@ -83,6 +86,16 @@ export default function Home() {
       setUniqueIdentifier(uniqueIdentifier || "");
       setVerified(verified);
       setRequestInProgress(false);
+
+      /*const res = await fetch("/api/register", {
+        method: "POST",
+        body: JSON.stringify({
+          queryResult: result,
+          proofs,
+        }),
+      });
+
+      console.log("Response from the server", await res.json());*/
     });
 
     onReject(() => {
