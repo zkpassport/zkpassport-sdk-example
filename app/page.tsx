@@ -1,28 +1,30 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ZKPassport, ProofResult, EU_COUNTRIES } from "@zkpassport/sdk";
 import QRCode from "react-qr-code";
 
 export default function Home() {
   const [message, setMessage] = useState("");
-  const [firstName, setFirstName] = useState("");
+  const [fullName, setFullName] = useState("");
   const [isEUCitizen, setIsEUCitizen] = useState<boolean | undefined>(undefined);
   const [isOver18, setIsOver18] = useState<boolean | undefined>(undefined);
   const [queryUrl, setQueryUrl] = useState("");
   const [uniqueIdentifier, setUniqueIdentifier] = useState("");
   const [verified, setVerified] = useState<boolean | undefined>(undefined);
   const [requestInProgress, setRequestInProgress] = useState(false);
+  const zkPassportRef = useRef<ZKPassport | null>(null);
 
-  let zkPassport: ZKPassport | null = null;
-  if (typeof window !== "undefined") {
-    zkPassport = new ZKPassport(window.location.hostname);
-  }
+  useEffect(() => {
+    if (!zkPassportRef.current) {
+      zkPassportRef.current = new ZKPassport(window.location.hostname);
+    }
+  }, []);
 
   const createRequest = async () => {
-    if (!zkPassport) {
+    if (!zkPassportRef.current) {
       return;
     }
-    setFirstName("");
+    setFullName("");
     setIsEUCitizen(undefined);
     setMessage("");
     setQueryUrl("");
@@ -30,7 +32,7 @@ export default function Home() {
     setUniqueIdentifier("");
     setVerified(undefined);
 
-    const queryBuilder = await zkPassport.request({
+    const queryBuilder = await zkPassportRef.current.request({
       name: "ZKPassport",
       logo: "https://zkpassport.id/favicon.png",
       purpose: "Proof of EU citizenship and firstname",
@@ -47,7 +49,7 @@ export default function Home() {
       onError,
     } = queryBuilder
       .in("nationality", EU_COUNTRIES)
-      .disclose("firstname")
+      .disclose("fullname")
       .gte("age", 18)
       .disclose("document_type")
       .done();
@@ -79,7 +81,7 @@ export default function Home() {
     onResult(async ({ result, uniqueIdentifier, verified, queryResultErrors }) => {
       console.log("Result of the query", result);
       console.log("Query result errors", queryResultErrors);
-      setFirstName(result?.firstname?.disclose?.result);
+      setFullName(result?.fullname?.disclose?.result);
       setIsEUCitizen(result?.nationality?.in?.result);
       setIsOver18(result?.age?.gte?.result);
       setMessage("Result received");
@@ -115,9 +117,9 @@ export default function Home() {
     <main className="w-full h-full flex flex-col items-center p-10">
       {queryUrl && <QRCode className="mb-4" value={queryUrl} />}
       {message && <p>{message}</p>}
-      {firstName && (
+      {fullName && (
         <p className="mt-2">
-          <b>Firstname:</b> {firstName}
+          <b>Full name:</b> {fullName}
         </p>
       )}
       {typeof isEUCitizen === "boolean" && (
