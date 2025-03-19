@@ -5,7 +5,7 @@ import QRCode from "react-qr-code";
 
 export default function Home() {
   const [message, setMessage] = useState("");
-  const [fullName, setFullName] = useState("");
+  const [firstName, setFirstName] = useState("");
   const [isEUCitizen, setIsEUCitizen] = useState<boolean | undefined>(undefined);
   const [isOver18, setIsOver18] = useState<boolean | undefined>(undefined);
   const [queryUrl, setQueryUrl] = useState("");
@@ -24,7 +24,7 @@ export default function Home() {
     if (!zkPassportRef.current) {
       return;
     }
-    setFullName("");
+    setFirstName("");
     setIsEUCitizen(undefined);
     setMessage("");
     setQueryUrl("");
@@ -49,7 +49,7 @@ export default function Home() {
       onError,
     } = queryBuilder
       .in("nationality", EU_COUNTRIES)
-      .disclose("fullname")
+      .disclose("firstname")
       .gte("age", 18)
       .disclose("document_type")
       .done();
@@ -81,7 +81,7 @@ export default function Home() {
     onResult(async ({ result, uniqueIdentifier, verified, queryResultErrors }) => {
       console.log("Result of the query", result);
       console.log("Query result errors", queryResultErrors);
-      setFullName(result?.fullname?.disclose?.result);
+      setFirstName(result?.firstname?.disclose?.result);
       setIsEUCitizen(result?.nationality?.in?.result);
       setIsOver18(result?.age?.gte?.result);
       setMessage("Result received");
@@ -117,9 +117,9 @@ export default function Home() {
     <main className="w-full h-full flex flex-col items-center p-10">
       {queryUrl && <QRCode className="mb-4" value={queryUrl} />}
       {message && <p>{message}</p>}
-      {fullName && (
+      {firstName && (
         <p className="mt-2">
-          <b>Full name:</b> {fullName}
+          <b>Firstname:</b> {firstName}
         </p>
       )}
       {typeof isEUCitizen === "boolean" && (
