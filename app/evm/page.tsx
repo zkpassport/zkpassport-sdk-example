@@ -2,6 +2,8 @@
 import { useEffect, useRef, useState } from "react";
 import { ZKPassport, ProofResult, EU_COUNTRIES } from "@zkpassport/sdk";
 import QRCode from "react-qr-code";
+import { useZKPassportVerifier } from "../../lib/useZKPassportVerifier";
+import NetworkInfo from "../../components/NetworkInfo";
 
 export default function Home() {
   const [message, setMessage] = useState("");
@@ -12,7 +14,11 @@ export default function Home() {
   const [uniqueIdentifier, setUniqueIdentifier] = useState("");
   const [verified, setVerified] = useState<boolean | undefined>(undefined);
   const [requestInProgress, setRequestInProgress] = useState(false);
+  const [onChainVerified, setOnChainVerified] = useState<boolean | undefined>(undefined);
   const zkPassportRef = useRef<ZKPassport | null>(null);
+
+  // Using our custom hook for contract interaction (now using public client)
+  const { verifyProof } = useZKPassportVerifier();
 
   useEffect(() => {
     if (!zkPassportRef.current) {
@@ -31,13 +37,14 @@ export default function Home() {
     setIsOver18(undefined);
     setUniqueIdentifier("");
     setVerified(undefined);
+    setOnChainVerified(undefined);
 
     const queryBuilder = await zkPassportRef.current.request({
       name: "ZKPassport",
       logo: "https://zkpassport.id/favicon.png",
       purpose: "Proof of EU citizenship and firstname",
       scope: "eu-adult",
-      mode: "fast",
+      mode: "compressed-evm",
     });
 
     const {
@@ -77,6 +84,27 @@ export default function Home() {
       proofs.push(result);
       setMessage(`Proofs received`);
       setRequestInProgress(false);
+
+      try {
+        // Perform on-chain verification
+        verifyProof(result)
+          .then(({ isVerified, uniqueIdentifier }) => {
+            setOnChainVerified(isVerified);
+            console.log("Unique identifier (from on-chain verification)", uniqueIdentifier);
+            setMessage(
+              isVerified
+                ? "Proof verified on-chain successfully"
+                : "Proof verification on-chain failed"
+            );
+          })
+          .catch((error) => {
+            console.error("Error verifying on-chain:", error);
+            setMessage("Error during on-chain verification");
+            setOnChainVerified(false);
+          });
+      } catch (error) {
+        console.error("Error preparing verification:", error);
+      }
     });
 
     onResult(async ({ result, uniqueIdentifier, verified, queryResultErrors }) => {
@@ -116,6 +144,8 @@ export default function Home() {
 
   return (
     <main className="w-full h-full flex flex-col items-center p-10">
+      <NetworkInfo />
+
       {queryUrl && <QRCode className="mb-4" value={queryUrl} />}
       {message && <p>{message}</p>}
       {firstName && (
@@ -142,6 +172,11 @@ export default function Home() {
       {verified !== undefined && (
         <p className="mt-2">
           <b>Verified:</b> {verified ? "Yes" : "No"}
+        </p>
+      )}
+      {onChainVerified !== undefined && (
+        <p className="mt-2">
+          <b>On-chain verified:</b> {onChainVerified ? "Yes" : "No"}
         </p>
       )}
       {!requestInProgress && (
