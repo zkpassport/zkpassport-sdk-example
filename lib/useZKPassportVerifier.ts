@@ -27,7 +27,7 @@ export function useZKPassportVerifier() {
 
       try {
         const params = zkPassport.getSolidityVerifierParameters(proofResult);
-        console.log("params", params);
+        const verifierDetails = zkPassport.getSolidityVerifierDetails("ethereum_sepolia");
 
         // Get the appropriate chain object based on network ID
         const chain = selectedNetwork.id === sepolia.id ? sepolia : anvil;
@@ -35,12 +35,12 @@ export function useZKPassportVerifier() {
         // Create a public client for the selected network
         const publicClient = createPublicClient({
           chain,
-          transport: http(selectedNetwork.rpcUrl),
+          transport: http("https://ethereum-sepolia-rpc.publicnode.com"),
         });
 
         // Use the public client to call the view function
         const result = await publicClient.readContract({
-          address: selectedNetwork.contractAddress as `0x${string}`,
+          address: verifierDetails.address as `0x${string}`,
           abi: ZKPASSPORT_VERIFIER_ABI,
           functionName: "verifyProof",
           args: [
