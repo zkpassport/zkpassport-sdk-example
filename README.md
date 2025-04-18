@@ -1,24 +1,27 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ZKPassport SDK Example
+
+This example demonstrates how to use the ZKPassport SDK for verifying passports and national IDs both for off-chain and on-chain verification.
 
 ## Getting Started
 
-First, run the development server:
+1. Clone this repository
+2. Install dependencies:
+   ```
+   npm install
+   ```
+3. Start the development server:
+   ```
+   npm run dev
+   ```
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Next.js App Structure
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+This application uses Next.js App Router with a proper separation of server and client components:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- Server components handle static metadata and app structure
+- Client components manage state, user interactions, and network communications
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+This architecture ensures optimal performance and SEO while still providing a rich interactive experience.
 
 ## Learn More
 

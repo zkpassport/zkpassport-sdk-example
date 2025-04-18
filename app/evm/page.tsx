@@ -1,17 +1,18 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { ZKPassport, ProofResult, EU_COUNTRIES } from "@zkpassport/sdk";
+import { ZKPassport, ProofResult } from "@zkpassport/sdk";
 import QRCode from "react-qr-code";
+import { createPublicClient, http } from "viem";
+import { sepolia } from "viem/chains";
 
 export default function Home() {
   const [message, setMessage] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [isEUCitizen, setIsEUCitizen] = useState<boolean | undefined>(undefined);
   const [isOver18, setIsOver18] = useState<boolean | undefined>(undefined);
   const [queryUrl, setQueryUrl] = useState("");
   const [uniqueIdentifier, setUniqueIdentifier] = useState("");
   const [verified, setVerified] = useState<boolean | undefined>(undefined);
   const [requestInProgress, setRequestInProgress] = useState(false);
+  const [onChainVerified, setOnChainVerified] = useState<boolean | undefined>(undefined);
   const zkPassportRef = useRef<ZKPassport | null>(null);
 
   useEffect(() => {
@@ -24,20 +25,19 @@ export default function Home() {
     if (!zkPassportRef.current) {
       return;
     }
-    setFirstName("");
-    setIsEUCitizen(undefined);
     setMessage("");
     setQueryUrl("");
     setIsOver18(undefined);
     setUniqueIdentifier("");
     setVerified(undefined);
+    setOnChainVerified(undefined);
 
     const queryBuilder = await zkPassportRef.current.request({
       name: "ZKPassport",
       logo: "https://zkpassport.id/favicon.png",
-      purpose: "Proof of EU citizenship and firstname",
-      scope: "eu-adult",
-      mode: "fast",
+      purpose: "Proof of adulthood",
+      scope: "adult",
+      mode: "compressed-evm",
     });
 
     const {
@@ -48,12 +48,7 @@ export default function Home() {
       onResult,
       onReject,
       onError,
-    } = queryBuilder
-      .in("nationality", EU_COUNTRIES)
-      .disclose("firstname")
-      .gte("age", 18)
-      .disclose("document_type")
-      .done();
+    } = queryBuilder.gte("age", 18).done();
 
     setQueryUrl(url);
     console.log(url);
@@ -72,18 +67,59 @@ export default function Home() {
 
     const proofs: ProofResult[] = [];
 
-    onProofGenerated((result: ProofResult) => {
+    onProofGenerated(async (result: ProofResult) => {
       console.log("Proof result", result);
       proofs.push(result);
       setMessage(`Proofs received`);
       setRequestInProgress(false);
+
+      if (!zkPassportRef.current) {
+        return;
+      }
+
+      try {
+        // Perform on-chain verification
+        const params = zkPassportRef.current.getSolidityVerifierParameters(result);
+        const verifierDetails =
+          zkPassportRef.current.getSolidityVerifierDetails("ethereum_sepolia");
+
+        // Create a public client for the selected network
+        const publicClient = createPublicClient({
+          chain: sepolia,
+          transport: http("https://ethereum-sepolia-rpc.publicnode.com"),
+        });
+
+        // Use the public client to call the view function
+        const contractCallResult = await publicClient.readContract({
+          address: verifierDetails.address as `0x${string}`,
+          abi: verifierDetails.abi,
+          functionName: "verifyProof",
+          args: [
+            params.vkeyHash,
+            params.proof,
+            params.publicInputs,
+            params.committedInputs,
+            params.committedInputCounts,
+            params.validityPeriodInDays,
+          ],
+        });
+
+        console.log("Contract call result", contractCallResult);
+        const isVerified = Array.isArray(contractCallResult)
+          ? Boolean(contractCallResult[0])
+          : false;
+        const uniqueIdentifier = Array.isArray(contractCallResult)
+          ? String(contractCallResult[1])
+          : "";
+        setOnChainVerified(isVerified);
+      } catch (error) {
+        console.error("Error preparing verification:", error);
+      }
     });
 
     onResult(async ({ result, uniqueIdentifier, verified, queryResultErrors }) => {
       console.log("Result of the query", result);
       console.log("Query result errors", queryResultErrors);
-      setFirstName(result?.firstname?.disclose?.result);
-      setIsEUCitizen(result?.nationality?.in?.result);
       setIsOver18(result?.age?.gte?.result);
       setMessage("Result received");
       setUniqueIdentifier(uniqueIdentifier || "");
@@ -118,16 +154,6 @@ export default function Home() {
     <main className="w-full h-full flex flex-col items-center p-10">
       {queryUrl && <QRCode className="mb-4" value={queryUrl} />}
       {message && <p>{message}</p>}
-      {firstName && (
-        <p className="mt-2">
-          <b>Firstname:</b> {firstName}
-        </p>
-      )}
-      {typeof isEUCitizen === "boolean" && (
-        <p className="mt-2">
-          <b>Is EU citizen:</b> {isEUCitizen ? "Yes" : "No"}
-        </p>
-      )}
       {typeof isOver18 === "boolean" && (
         <p className="mt-2">
           <b>Is over 18:</b> {isOver18 ? "Yes" : "No"}
@@ -142,6 +168,11 @@ export default function Home() {
       {verified !== undefined && (
         <p className="mt-2">
           <b>Verified:</b> {verified ? "Yes" : "No"}
+        </p>
+      )}
+      {onChainVerified !== undefined && (
+        <p className="mt-2">
+          <b>On-chain verified:</b> {onChainVerified ? "Yes" : "No"}
         </p>
       )}
       {!requestInProgress && (
