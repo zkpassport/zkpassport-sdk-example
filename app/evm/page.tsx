@@ -67,9 +67,9 @@ export default function Home() {
 
     const proofs: ProofResult[] = [];
 
-    onProofGenerated(async (result: ProofResult) => {
-      console.log("Proof result", result);
-      proofs.push(result);
+    onProofGenerated(async (proof: ProofResult) => {
+      console.log("Proof result", proof);
+      proofs.push(proof);
       setMessage(`Proofs received`);
       setRequestInProgress(false);
 
@@ -78,33 +78,36 @@ export default function Home() {
       }
 
       try {
-        // Perform on-chain verification
-        const params = zkPassportRef.current.getSolidityVerifierParameters(result);
-        const verifierDetails =
+        // Pass the proof you've received from the user to this function
+        // along with the scope you've used above and the function will return
+        // all the parameters needed to call the verifier contract
+        const params = zkPassportRef.current.getSolidityVerifierParameters({
+          proof,
+          scope: "adult",
+        });
+
+        // Get the details of the verifier contract: its address, its abi and the function name
+        // For now the verifier contract is only deployed on Ethereum Sepolia
+        const { address, abi, functionName } =
           zkPassportRef.current.getSolidityVerifierDetails("ethereum_sepolia");
 
-        // Create a public client for the selected network
+        // Create a public client for sepolia
         const publicClient = createPublicClient({
           chain: sepolia,
           transport: http("https://ethereum-sepolia-rpc.publicnode.com"),
         });
 
-        // Use the public client to call the view function
+        // Use the public client to call the verify function of the ZKPassport verifier contract
         const contractCallResult = await publicClient.readContract({
-          address: verifierDetails.address as `0x${string}`,
-          abi: verifierDetails.abi,
-          functionName: "verifyProof",
-          args: [
-            params.vkeyHash,
-            params.proof,
-            params.publicInputs,
-            params.committedInputs,
-            params.committedInputCounts,
-            params.validityPeriodInDays,
-          ],
+          address,
+          abi,
+          functionName,
+          args: [params],
         });
 
         console.log("Contract call result", contractCallResult);
+        // The result is an array with the first element being a boolean indicating if the proof is valid
+        // and the second element being the unique identifier
         const isVerified = Array.isArray(contractCallResult)
           ? Boolean(contractCallResult[0])
           : false;
