@@ -38,6 +38,7 @@ export default function Home() {
       purpose: "Proof of adulthood",
       scope: "adult",
       mode: "compressed-evm",
+      devMode: true,
     });
 
     const {
@@ -84,6 +85,7 @@ export default function Home() {
         const params = zkPassportRef.current.getSolidityVerifierParameters({
           proof,
           scope: "adult",
+          devMode: true,
         });
 
         // Get the details of the verifier contract: its address, its abi and the function name

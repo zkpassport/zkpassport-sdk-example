@@ -38,6 +38,7 @@ export default function Home() {
       purpose: "Proof of EU citizenship and firstname",
       scope: "eu-adult",
       mode: "fast",
+      devMode: true,
     });
 
     const {
@@ -49,7 +50,7 @@ export default function Home() {
       onReject,
       onError,
     } = queryBuilder
-      .in("nationality", EU_COUNTRIES)
+      .in("issuing_country", [...EU_COUNTRIES, "Zero Knowledge Republic"])
       .disclose("firstname")
       .gte("age", 18)
       .disclose("document_type")
