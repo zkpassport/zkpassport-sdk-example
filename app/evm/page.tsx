@@ -39,6 +39,7 @@ export default function Home() {
       scope: "adult",
       mode: "compressed-evm",
       devMode: true,
+      evmChain: "ethereum_sepolia",
     });
 
     const {
