@@ -10,7 +10,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@zkpassport/sdk": "^0.4.2",
+    "@zkpassport/sdk": "^0.4.3",
     "next": "15.1.0",
     "react": "19.0.0",
     "react-dom": "19.0.0",
