@@ -97,9 +97,9 @@ export default function Home() {
           queryResult: result,
           proofs,
         }),
-      });
+      });*/
 
-      console.log("Response from the server", await res.json());*/
+      //console.log("Response from the server", await res.json());
     });
 
     onReject(() => {
