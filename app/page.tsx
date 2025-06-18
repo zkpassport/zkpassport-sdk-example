@@ -91,15 +91,16 @@ export default function Home() {
       setVerified(verified);
       setRequestInProgress(false);
 
-      /*const res = await fetch("/api/register", {
+      const res = await fetch("/api/register", {
         method: "POST",
         body: JSON.stringify({
           queryResult: result,
           proofs,
+          domain: window.location.hostname,
         }),
-      });*/
+      });
 
-      //console.log("Response from the server", await res.json());
+      console.log("Response from the server", await res.json());
     });
 
     onReject(() => {
