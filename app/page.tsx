@@ -50,7 +50,7 @@ export default function Home() {
       onReject,
       onError,
     } = queryBuilder
-      .in("issuing_country", [...EU_COUNTRIES, "Zero Knowledge Republic"])
+      .in("nationality", [...EU_COUNTRIES, "Zero Knowledge Republic"])
       .disclose("firstname")
       .gte("age", 18)
       .disclose("document_type")
