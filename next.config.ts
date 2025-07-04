@@ -3,7 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   outputFileTracingIncludes: {
-    "/api/submit": [
+    "/api/register": [
       "./node_modules/@aztec/bb.js/dest/node/**/*",
       "./node_modules/@aztec/bb.js/dest/node-cjs/**/*",
     ],
