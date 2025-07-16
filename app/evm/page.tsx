@@ -39,7 +39,6 @@ export default function Home() {
       scope: "adult",
       mode: "compressed-evm",
       devMode: true,
-      evmChain: "ethereum_sepolia",
     });
 
     const {
@@ -53,6 +52,7 @@ export default function Home() {
     } = queryBuilder
       .gte("age", 18)
       .bind("user_address", "0x5e4B11F7B7995F5Cee0134692a422b045091112F")
+      .bind("chain", "ethereum_sepolia")
       .bind("custom_data", "email:test@test.com,customer_id:1234567890")
       .done();
 
