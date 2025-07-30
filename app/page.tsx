@@ -5,7 +5,7 @@ import QRCode from "react-qr-code";
 
 export default function Home() {
   const [message, setMessage] = useState("");
-  const [firstName, setFirstName] = useState("");
+  const [firstName, setFirstName] = useState<string | undefined>(undefined);
   const [isEUCitizen, setIsEUCitizen] = useState<boolean | undefined>(undefined);
   const [isOver18, setIsOver18] = useState<boolean | undefined>(undefined);
   const [queryUrl, setQueryUrl] = useState("");
@@ -87,6 +87,7 @@ export default function Home() {
       setIsEUCitizen(result?.nationality?.in?.result);
       setIsOver18(result?.age?.gte?.result);
       setMessage("Result received");
+      console.log("Birthdate", result?.birthdate?.disclose?.result.toDateString());
       setUniqueIdentifier(uniqueIdentifier || "");
       setVerified(verified);
       setRequestInProgress(false);
