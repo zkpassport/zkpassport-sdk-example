@@ -54,6 +54,8 @@ export default function Home() {
       .disclose("firstname")
       .gte("age", 18)
       .disclose("document_type")
+      // If you want to enable face match (iOS only for now)
+      //.facematch("strict")
       .done();
 
     setQueryUrl(url);
