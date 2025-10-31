@@ -54,7 +54,10 @@ export default function Home() {
       .bind("user_address", "0x5e4B11F7B7995F5Cee0134692a422b045091112F")
       .bind("chain", "ethereum_sepolia")
       .bind("custom_data", "email:test@test.com,customer_id:1234567890")
-      .sanctions()
+      .sanctions("all", "all", {
+        strict: true,
+      })
+      .facematch("strict")
       .done();
 
     setQueryUrl(url);
