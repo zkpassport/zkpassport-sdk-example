@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { ZKPassport, ProofResult, EU_COUNTRIES } from "@zkpassport/sdk";
+import { ZKPassport, type ProofResult, EU_COUNTRIES } from "@zkpassport/sdk";
 import QRCode from "react-qr-code";
 
 export default function Home() {
@@ -54,7 +54,7 @@ export default function Home() {
       .disclose("firstname")
       .gte("age", 18)
       .disclose("document_type")
-      .facematch("regular")
+      //.facematch("regular")
       .sanctions()
       .gte("age", 18)
       .done();

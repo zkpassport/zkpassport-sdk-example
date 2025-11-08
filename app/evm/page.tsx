@@ -99,8 +99,7 @@ export default function Home() {
 
         // Get the details of the verifier contract: its address, its abi and the function name
         // For now the verifier contract is only deployed on Ethereum Sepolia
-        const { address, abi, functionName } =
-          zkPassportRef.current.getSolidityVerifierDetails("ethereum_sepolia");
+        const { address, abi, functionName } = zkPassportRef.current.getSolidityVerifierDetails();
 
         // Create a public client for sepolia
         const publicClient = createPublicClient({
