@@ -172,7 +172,10 @@ export default function Home() {
           client as any,
           undefined,
           undefined,
-          "KYC"
+          JSON.stringify({
+            queryResult: result,
+            proofs
+          })
         );
 
         const res = await apiClient.get("/weather", {
