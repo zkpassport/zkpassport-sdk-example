@@ -10,7 +10,7 @@ import axios from "axios";
 
 // Base axios instance without payment interceptor
 const baseApiClient = axios.create({
-  baseURL: "http://localhost:4021",
+  baseURL: "/",
   headers: {
     "Content-Type": "application/json",
   },
@@ -178,7 +178,7 @@ export default function Home() {
           })
         );
 
-        const res = await apiClient.get("/weather", {
+        const res = await apiClient.get("/api/weather", {
           mode: 'cors',
         })
         console.log("Response from x402 server", res.data);
