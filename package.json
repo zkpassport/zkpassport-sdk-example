@@ -10,6 +10,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@space-meridian/x402-fetch": "^0.7.1",
     "@zkpassport/sdk": "^0.12.1",
     "next": "15.1.0",
     "react": "19.0.0",
