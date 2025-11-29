@@ -10,12 +10,14 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@space-meridian/x402-axios": "^0.7.1",
     "@zkpassport/sdk": "^0.12.1",
+    "axios": "^1.13.2",
     "next": "15.1.0",
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "react-qr-code": "^2.0.15",
-    "viem": "^2.27.0"
+    "viem": "^2.39.3"
   },
   "devDependencies": {
     "@types/node": "^20",

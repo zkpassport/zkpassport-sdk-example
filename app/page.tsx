@@ -2,6 +2,19 @@
 import { useEffect, useRef, useState } from "react";
 import { ZKPassport, type ProofResult, EU_COUNTRIES } from "@zkpassport/sdk";
 import QRCode from "react-qr-code";
+import { withPaymentInterceptor } from "@space-meridian/x402-axios";
+import { createWalletClient, custom, type WalletClient } from 'viem';
+import { baseSepolia } from 'viem/chains';
+import type { Hex } from 'viem';
+import axios from "axios";
+
+// Base axios instance without payment interceptor
+const baseApiClient = axios.create({
+  baseURL: "/",
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
 
 export default function Home() {
   const [message, setMessage] = useState("");
@@ -50,7 +63,7 @@ export default function Home() {
       onReject,
       onError,
     } = queryBuilder
-      .in("nationality", [...EU_COUNTRIES, "Zero Knowledge Republic"])
+      // .in("nationality", [...EU_COUNTRIES, "Zero Knowledge Republic"])
       .disclose("firstname")
       .gte("age", 18)
       .disclose("document_type")
@@ -95,16 +108,81 @@ export default function Home() {
       setVerified(verified);
       setRequestInProgress(false);
 
-      const res = await fetch("/api/register", {
-        method: "POST",
-        body: JSON.stringify({
-          queryResult: result,
-          proofs,
-          domain: window.location.hostname,
-        }),
-      });
+      {
+        const res = await fetch("/api/register", {
+          method: "POST",
+          body: JSON.stringify({
+            queryResult: result,
+            proofs,
+            domain: window.location.hostname,
+          }),
+        });
 
-      console.log("Response from the server", await res.json());
+        console.log("Response from the server", await res.json());
+      }
+
+      {
+        const accounts = await window.ethereum.request({ 
+          method: 'eth_requestAccounts' 
+        }) as string[];
+        if (accounts.length === 0) {
+          throw new Error('No accounts found');
+        }
+        const chainId = await window.ethereum.request({ 
+          method: 'eth_chainId' 
+        }) as string;
+        const baseSepoliaChainIdHex = '0x14a34'; // 84532 in hex
+        if (chainId !== baseSepoliaChainIdHex) {
+          try {
+            await window.ethereum.request({
+              method: 'wallet_switchEthereumChain',
+              params: [{ chainId: baseSepoliaChainIdHex }],
+            });
+          } catch (switchError: any) {
+            // This error code indicates that the chain has not been added to browser wallet
+            if (switchError.code === 4902) {
+              await window.ethereum.request({
+                method: 'wallet_addEthereumChain',
+                params: [{
+                  chainId: baseSepoliaChainIdHex,
+                  chainName: 'Base Sepolia',
+                  nativeCurrency: {
+                    name: 'Ethereum',
+                    symbol: 'ETH',
+                    decimals: 18,
+                  },
+                  rpcUrls: ['https://sepolia.base.org'],
+                  blockExplorerUrls: ['https://sepolia.basescan.org'],
+                }],
+              });
+            } else {
+              throw switchError;
+            }
+          }
+        }
+        // Create viem wallet client
+        const client = createWalletClient({
+          account: accounts[0] as Hex,
+          chain: baseSepolia,
+          transport: custom(window.ethereum)
+        });
+
+        const apiClient = withPaymentInterceptor(
+          baseApiClient,
+          client as any,
+          undefined,
+          undefined,
+          JSON.stringify({
+            queryResult: result,
+            proofs
+          })
+        );
+
+        const res = await apiClient.get("/api/weather", {
+          mode: 'cors',
+        })
+        console.log("Response from x402 server", res.data);
+      }
     });
 
     onReject(() => {
