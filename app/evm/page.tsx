@@ -124,6 +124,7 @@ export default function Home() {
         const uniqueIdentifier = Array.isArray(contractCallResult)
           ? String(contractCallResult[1])
           : "";
+        console.log("Unique identifier", uniqueIdentifier);
         setOnChainVerified(isVerified);
       } catch (error) {
         console.error("Error preparing verification:", error);

@@ -1,28 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  serverExternalPackages: ["@aztec/bb.js"],
   outputFileTracingIncludes: {
-    "/api/register": [
-      "./node_modules/@aztec/bb.js/dest/node/**/*",
-      "./node_modules/@aztec/bb.js/dest/node-cjs/**/*",
-    ],
-  },
-  serverComponentsExternalPackages: ["@aztec/bb.js"],
-  webpack: (config, { isServer }) => {
-    if (isServer) {
-      config.externals.push({
-        "@aztec/bb.js": "@aztec/bb.js",
-      });
-    }
-
-    // Handle WASM files
-    config.experiments = {
-      ...config.experiments,
-      asyncWebAssembly: true,
-    };
-
-    return config;
+    // Update the route to the one where you need to verify ZKPassport proof
+    '/api/register': ["./node_modules/@aztec/bb.js/dest/node/**/*", "./node_modules/@aztec/bb.js/dest/node-cjs/**/*"],
   },
 };
 
