@@ -139,16 +139,6 @@ export default function Home() {
       setUniqueIdentifier(uniqueIdentifier || "");
       setVerified(verified);
       setRequestInProgress(false);
-
-      /*const res = await fetch("/api/register", {
-        method: "POST",
-        body: JSON.stringify({
-          queryResult: result,
-          proofs,
-        }),
-      });
-
-      console.log("Response from the server", await res.json());*/
     });
 
     onReject(() => {

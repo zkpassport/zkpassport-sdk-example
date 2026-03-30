@@ -54,7 +54,7 @@ export default function Home() {
       .disclose("firstname")
       .gte("age", 18)
       .disclose("document_type")
-      //.facematch("regular")
+      .facematch("strict")
       .sanctions()
       .gte("age", 18)
       .done();

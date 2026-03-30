@@ -1,4 +1,4 @@
-import { QueryResult, ZKPassport } from "@zkpassport/sdk";
+import { EU_COUNTRIES, QueryResult, ZKPassport } from "@zkpassport/sdk";
 
 import { ProofResult } from "@zkpassport/sdk";
 
@@ -19,8 +19,21 @@ export async function POST(request: Request) {
 
   const zkpassport = new ZKPassport(domain);
 
+  // Recreate the query to enforce the right conditions were checked by the app
+  const { query } = await zkpassport
+    .createQuery()
+    .in("nationality", [...EU_COUNTRIES, "Zero Knowledge Republic"])
+    .disclose("firstname")
+    .gte("age", 18)
+    .disclose("document_type")
+    .facematch("strict")
+    .sanctions()
+    .gte("age", 18)
+    .done();
+
   const { verified, uniqueIdentifier } = await zkpassport.verify({
     proofs,
+    originalQuery: query,
     queryResult,
     devMode: true,
   });
