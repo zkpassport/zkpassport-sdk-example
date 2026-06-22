@@ -64,8 +64,12 @@ const allDisclosures = (q: QueryBuilder) =>
     .disclose("issuing_country")
     .disclose("expiry_date");
 
-/** Strict facematch — mandatory when using the salted (OPRF) nullifier. */
-const withFacematch = (q: QueryBuilder) => q.facematch("strict");
+/**
+ * Add a facematch requirement. `"strict"` is mandatory when using the salted
+ * (OPRF) nullifier; `"regular"` is the looser, non-strict mode.
+ */
+const withFacematch = (q: QueryBuilder, mode: "strict" | "regular" = "strict") =>
+  q.facematch(mode);
 
 // --- Scenarios (one per testing-checklist item) ----------------------------
 // Keyed by name. Grouped by proof mode (Regular first, then Compressed), and
@@ -75,8 +79,12 @@ const withFacematch = (q: QueryBuilder) => q.facematch("strict");
 export const scenarios: Record<
   | "regularFewDefault"
   | "regularAllDefault"
+  | "regularFacematchRegular"
+  | "regularFacematchStrict"
   | "regularSalted"
   | "compressedAllDefault"
+  | "compressedFacematchRegular"
+  | "compressedFacematchStrict"
   | "compressedSalted",
   Scenario
 > = {
@@ -96,6 +104,24 @@ export const scenarios: Record<
     mode: "fast",
     build: allDisclosures,
   },
+  regularFacematchRegular: {
+    id: "regular-facematch-regular",
+    label: "Regular · few disclosures · regular facematch · non-salted",
+    description:
+      "Fast proof, a few disclosures, regular (non-strict) facematch, default nullifier.",
+    purpose: "Disclose a few attributes and match your face",
+    mode: "fast",
+    build: (q) => withFacematch(fewDisclosures(q), "regular"),
+  },
+  regularFacematchStrict: {
+    id: "regular-facematch-strict",
+    label: "Regular · few disclosures · strict facematch · non-salted",
+    description:
+      "Fast proof, a few disclosures, strict facematch, default nullifier.",
+    purpose: "Disclose a few attributes and match your face",
+    mode: "fast",
+    build: (q) => withFacematch(fewDisclosures(q), "strict"),
+  },
   regularSalted: {
     id: "regular-salted",
     label: "Regular · few disclosures · salted",
@@ -112,6 +138,24 @@ export const scenarios: Record<
     purpose: "Disclose all document attributes",
     mode: "compressed",
     build: allDisclosures,
+  },
+  compressedFacematchRegular: {
+    id: "compressed-facematch-regular",
+    label: "Compressed · few disclosures · regular facematch · non-salted",
+    description:
+      "Compressed proof, a few disclosures, regular (non-strict) facematch, default nullifier.",
+    purpose: "Disclose a few attributes and match your face",
+    mode: "compressed",
+    build: (q) => withFacematch(fewDisclosures(q), "regular"),
+  },
+  compressedFacematchStrict: {
+    id: "compressed-facematch-strict",
+    label: "Compressed · few disclosures · strict facematch · non-salted",
+    description:
+      "Compressed proof, a few disclosures, strict facematch, default nullifier.",
+    purpose: "Disclose a few attributes and match your face",
+    mode: "compressed",
+    build: (q) => withFacematch(fewDisclosures(q), "strict"),
   },
   compressedSalted: {
     id: "compressed-salted",

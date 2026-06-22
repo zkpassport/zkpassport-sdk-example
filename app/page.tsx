@@ -98,6 +98,8 @@ export default function Home() {
           const res = await fetch("/api/register", {
             method: "POST",
             body: JSON.stringify({
+              sdkVersion: "15",
+              scenarioId: scenario.id,
               queryResult: result,
               proofs,
               domain: window.location.hostname,
