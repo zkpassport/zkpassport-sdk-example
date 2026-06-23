@@ -21,7 +21,7 @@ type ProofMode = NonNullable<QRProps["mode"]>;
 export type Scenario = {
   /** Stable id, also used as the request scope and to force a fresh QR on switch. */
   id: string;
-  /** Human label shown in the selector — "Mode · disclosures · nullifier". */
+  /** Human label shown in the selector — "Mode · nullifier · disclosures · facematch". */
   label: string;
   /** One-line explanation of what the proof does. */
   description: string;
@@ -96,7 +96,7 @@ export const scenarios: Record<
 > = {
   fastFewDefault: {
     id: "fast-few-default",
-    label: "Fast · few disclosures · non-salted",
+    label: "Fast · non-salted · few disclosures",
     description: "Fast proof, a few disclosures, default nullifier.",
     purpose: "Disclose a few attributes",
     mode: "fast",
@@ -104,7 +104,7 @@ export const scenarios: Record<
   },
   fastAllDefault: {
     id: "fast-all-default",
-    label: "Fast · all disclosures · non-salted",
+    label: "Fast · non-salted · all disclosures",
     description: "Fast proof, all disclosures, default nullifier.",
     purpose: "Disclose all document attributes",
     mode: "fast",
@@ -112,7 +112,7 @@ export const scenarios: Record<
   },
   fastFacematchRegular: {
     id: "fast-facematch-regular",
-    label: "Fast · few disclosures · regular facematch · non-salted",
+    label: "Fast · non-salted · few disclosures · regular facematch",
     description:
       "Fast proof, a few disclosures, regular (non-strict) facematch, default nullifier.",
     purpose: "Disclose a few attributes and match your face",
@@ -121,7 +121,7 @@ export const scenarios: Record<
   },
   fastFacematchStrict: {
     id: "fast-facematch-strict",
-    label: "Fast · few disclosures · strict facematch · non-salted",
+    label: "Fast · non-salted · few disclosures · strict facematch",
     description:
       "Fast proof, a few disclosures, strict facematch, default nullifier.",
     purpose: "Disclose a few attributes and match your face",
@@ -130,7 +130,7 @@ export const scenarios: Record<
   },
   fastSalted: {
     id: "fast-salted",
-    label: "Fast · few disclosures · salted",
+    label: "Fast · salted · few disclosures",
     description: "Fast proof, a few disclosures, salted nullifier + strict facematch.",
     purpose: "Disclose a few attributes",
     mode: "fast",
@@ -139,7 +139,7 @@ export const scenarios: Record<
   },
   compressedAllDefault: {
     id: "compressed-all-default",
-    label: "Compressed · all disclosures · non-salted",
+    label: "Compressed · non-salted · all disclosures",
     description: "Compressed proof, all disclosures, default nullifier.",
     purpose: "Disclose all document attributes",
     mode: "compressed",
@@ -147,7 +147,7 @@ export const scenarios: Record<
   },
   compressedFacematchRegular: {
     id: "compressed-facematch-regular",
-    label: "Compressed · few disclosures · regular facematch · non-salted",
+    label: "Compressed · non-salted · few disclosures · regular facematch",
     description:
       "Compressed proof, a few disclosures, regular (non-strict) facematch, default nullifier.",
     purpose: "Disclose a few attributes and match your face",
@@ -156,7 +156,7 @@ export const scenarios: Record<
   },
   compressedFacematchStrict: {
     id: "compressed-facematch-strict",
-    label: "Compressed · few disclosures · strict facematch · non-salted",
+    label: "Compressed · non-salted · few disclosures · strict facematch",
     description:
       "Compressed proof, a few disclosures, strict facematch, default nullifier.",
     purpose: "Disclose a few attributes and match your face",
@@ -165,7 +165,7 @@ export const scenarios: Record<
   },
   compressedSalted: {
     id: "compressed-salted",
-    label: "Compressed · few disclosures · salted",
+    label: "Compressed · salted · few disclosures",
     description: "Compressed proof, a few disclosures, salted nullifier + strict facematch.",
     purpose: "Disclose a few attributes",
     mode: "compressed",
@@ -174,7 +174,7 @@ export const scenarios: Record<
   },
   evmAge: {
     id: "evm-age",
-    label: "EVM · age ≥ 18 · non-salted",
+    label: "EVM · non-salted · age ≥ 18",
     description:
       "Compressed EVM proof, age over 18 check, default nullifier (on-chain verified).",
     purpose: "Verify you are over 18",
@@ -183,7 +183,7 @@ export const scenarios: Record<
   },
   evmAllDefault: {
     id: "evm-all-default",
-    label: "EVM · all disclosures · non-salted",
+    label: "EVM · non-salted · all disclosures",
     description: "Compressed EVM proof, all disclosures, default nullifier.",
     purpose: "Disclose all document attributes",
     mode: "compressed-evm",
@@ -191,7 +191,7 @@ export const scenarios: Record<
   },
   evmFacematchRegular: {
     id: "evm-facematch-regular",
-    label: "EVM · few disclosures · regular facematch · non-salted",
+    label: "EVM · non-salted · few disclosures · regular facematch",
     description:
       "Compressed EVM proof, a few disclosures, regular (non-strict) facematch, default nullifier.",
     purpose: "Disclose a few attributes and match your face",
@@ -200,7 +200,7 @@ export const scenarios: Record<
   },
   evmFacematchStrict: {
     id: "evm-facematch-strict",
-    label: "EVM · few disclosures · strict facematch · non-salted",
+    label: "EVM · non-salted · few disclosures · strict facematch",
     description:
       "Compressed EVM proof, a few disclosures, strict facematch, default nullifier.",
     purpose: "Disclose a few attributes and match your face",
@@ -209,7 +209,7 @@ export const scenarios: Record<
   },
   evmSalted: {
     id: "evm-salted",
-    label: "EVM · few disclosures · salted",
+    label: "EVM · salted · few disclosures",
     description:
       "Compressed EVM proof, a few disclosures, salted nullifier + strict facematch.",
     purpose: "Disclose a few attributes",

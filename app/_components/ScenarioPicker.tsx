@@ -15,10 +15,17 @@ type Props = {
   onDevModeChange: (value: boolean) => void;
 };
 
+// Labels are prefixed with the mode (e.g. "Fast · …"), which is redundant once
+// grouped under a mode heading — drop the first segment for display.
+const shortLabel = (label: string) => {
+  const parts = label.split(" · ");
+  return parts.length > 1 ? parts.slice(1).join(" · ") : label;
+};
+
 /**
  * Left-hand scenario list: every option is visible at once and selectable in a
- * single click (no dropdown). Scenarios are grouped by proof mode in the order
- * they first appear in the list.
+ * single click (no dropdown). Compact one-line rows separated by dividers and
+ * grouped by proof mode; the full description shows on hover.
  */
 export function ScenarioPicker({
   scenarios,
@@ -34,44 +41,44 @@ export function ScenarioPicker({
   }, []);
 
   return (
-    <div className="flex w-full flex-col gap-4 sm:w-72">
+    <div className="flex w-full flex-col gap-4 sm:w-96">
       <label className="flex items-center gap-2 text-xs text-gray-600">
         <input
           type="checkbox"
           checked={devMode}
           onChange={(e) => onDevModeChange(e.target.checked)}
         />
-        devMode {devMode ? "(mock passports · Sepolia)" : "(real passports · mainnet)"}
+        devMode {devMode ? "(Sepolia)" : "(mainnet)"}
       </label>
 
       <div className="flex flex-col gap-4">
         {modes.map((mode) => (
-          <div key={mode} className="flex flex-col gap-1.5">
-            <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+          <div key={mode}>
+            <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-gray-400">
               {MODE_LABELS[mode] ?? mode}
             </p>
-            {scenarios
-              .filter((s) => s.mode === mode)
-              .map((s) => {
-                const active = s.id === selectedId;
-                return (
-                  <button
-                    key={s.id}
-                    type="button"
-                    onClick={() => onSelect(s)}
-                    className={`rounded-md border px-3 py-2 text-left text-xs transition-colors ${
-                      active
-                        ? "border-blue-500 bg-blue-50 text-gray-900"
-                        : "border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50"
-                    }`}
-                  >
-                    <span className="block font-medium">{s.label}</span>
-                    <span className="mt-0.5 block text-[11px] text-gray-400">
-                      {s.description}
-                    </span>
-                  </button>
-                );
-              })}
+            <div className="divide-y divide-gray-200 border-y border-gray-200">
+              {scenarios
+                .filter((s) => s.mode === mode)
+                .map((s) => {
+                  const active = s.id === selectedId;
+                  return (
+                    <button
+                      key={s.id}
+                      type="button"
+                      title={s.description}
+                      onClick={() => onSelect(s)}
+                      className={`block w-full truncate px-2 py-1.5 text-left text-xs transition-colors ${
+                        active
+                          ? "bg-blue-50 font-medium text-blue-700"
+                          : "text-gray-700 hover:bg-gray-100"
+                      }`}
+                    >
+                      {shortLabel(s.label)}
+                    </button>
+                  );
+                })}
+            </div>
           </div>
         ))}
       </div>
