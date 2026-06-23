@@ -21,16 +21,12 @@ export async function POST(request: Request) {
     proofs,
     domain,
     scenarioId,
-    query: providedQuery,
     sdkVersion = "15",
   }: {
     queryResult: QueryResult;
     proofs: ProofResult[];
     domain: string;
     scenarioId?: string;
-    // Manual queries have no scenario id, so the client sends the query object
-    // to verify against directly.
-    query?: Query;
     sdkVersion?: SdkVersion;
   } = await request.json();
 
@@ -46,31 +42,25 @@ export async function POST(request: Request) {
     ? Object.values(scenarios).find((s) => s.id === scenarioId)
     : undefined;
 
-  // Determine the query to verify the proofs against. verify() compares the
-  // proofs to this `originalQuery`, so it must match what the app actually
-  // proved or verification always fails.
-  //   1. scenario id  → rebuild that scenario's exact query (tamper resistant)
-  //   2. explicit query (manual mode) → verify against the provided query
-  //   3. neither → fall back to the original hardcoded example query
+  // Recreate the query server-side to enforce the right conditions were checked
+  // by the app. When a scenario id is provided, rebuild that scenario's exact
+  // query — otherwise verify() compares the proofs against a query they were
+  // never generated for and always fails. Without an id we fall back to the
+  // original hardcoded example query.
   const builder = zkpassport.createQuery();
-  let query: Query;
-  if (scenario) {
-    query = scenario.build(builder as never).done().query as Query;
-  } else if (providedQuery) {
-    query = providedQuery;
-  } else {
-    query = (
-      await builder
-        .in("nationality", [...EU_COUNTRIES, "Zero Knowledge Republic"])
-        .disclose("firstname")
-        .gte("age", 18)
-        .disclose("document_type")
-        .facematch("strict")
-        .sanctions()
-        .gte("age", 18)
-        .done()
-    ).query;
-  }
+  const query: Query = scenario
+    ? (scenario.build(builder as never).done().query as Query)
+    : (
+        await builder
+          .in("nationality", [...EU_COUNTRIES, "Zero Knowledge Republic"])
+          .disclose("firstname")
+          .gte("age", 18)
+          .disclose("document_type")
+          .facematch("strict")
+          .sanctions()
+          .gte("age", 18)
+          .done()
+      ).query;
 
   const { verified, uniqueIdentifier } = await zkpassport.verify({
     proofs,

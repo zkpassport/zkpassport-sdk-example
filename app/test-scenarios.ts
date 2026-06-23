@@ -26,7 +26,7 @@ export type Scenario = {
   description: string;
   /** Purpose string shown to the user in the mobile app. */
   purpose: string;
-  /** Proof mode: "fast" (regular), "compressed", or "compressed-evm". */
+  /** Proof mode: "fast", "compressed", or "compressed-evm". */
   mode: ProofMode;
   /**
    * Salted (OPRF) nullifier. Leave undefined for the default non-salted nullifier.
@@ -72,59 +72,64 @@ const withFacematch = (q: QueryBuilder, mode: "strict" | "regular" = "strict") =
   q.facematch(mode);
 
 // --- Scenarios (one per testing-checklist item) ----------------------------
-// Keyed by name. Grouped by proof mode (Regular first, then Compressed), and
+// Keyed by name. Grouped by proof mode (Fast first, then Compressed), and
 // within each group ordered from least to most likely to fail — so you can
 // test top-to-bottom.
 
 export const scenarios: Record<
-  | "regularFewDefault"
-  | "regularAllDefault"
-  | "regularFacematchRegular"
-  | "regularFacematchStrict"
-  | "regularSalted"
+  | "fastFewDefault"
+  | "fastAllDefault"
+  | "fastFacematchRegular"
+  | "fastFacematchStrict"
+  | "fastSalted"
   | "compressedAllDefault"
   | "compressedFacematchRegular"
   | "compressedFacematchStrict"
-  | "compressedSalted",
+  | "compressedSalted"
+  | "evmAge"
+  | "evmAllDefault"
+  | "evmFacematchRegular"
+  | "evmFacematchStrict"
+  | "evmSalted",
   Scenario
 > = {
-  regularFewDefault: {
-    id: "regular-few-default",
-    label: "Regular · few disclosures · non-salted",
+  fastFewDefault: {
+    id: "fast-few-default",
+    label: "Fast · few disclosures · non-salted",
     description: "Fast proof, a few disclosures, default nullifier.",
     purpose: "Disclose a few attributes",
     mode: "fast",
     build: fewDisclosures,
   },
-  regularAllDefault: {
-    id: "regular-all-default",
-    label: "Regular · all disclosures · non-salted",
+  fastAllDefault: {
+    id: "fast-all-default",
+    label: "Fast · all disclosures · non-salted",
     description: "Fast proof, all disclosures, default nullifier.",
     purpose: "Disclose all document attributes",
     mode: "fast",
     build: allDisclosures,
   },
-  regularFacematchRegular: {
-    id: "regular-facematch-regular",
-    label: "Regular · few disclosures · regular facematch · non-salted",
+  fastFacematchRegular: {
+    id: "fast-facematch-regular",
+    label: "Fast · few disclosures · regular facematch · non-salted",
     description:
       "Fast proof, a few disclosures, regular (non-strict) facematch, default nullifier.",
     purpose: "Disclose a few attributes and match your face",
     mode: "fast",
     build: (q) => withFacematch(fewDisclosures(q), "regular"),
   },
-  regularFacematchStrict: {
-    id: "regular-facematch-strict",
-    label: "Regular · few disclosures · strict facematch · non-salted",
+  fastFacematchStrict: {
+    id: "fast-facematch-strict",
+    label: "Fast · few disclosures · strict facematch · non-salted",
     description:
       "Fast proof, a few disclosures, strict facematch, default nullifier.",
     purpose: "Disclose a few attributes and match your face",
     mode: "fast",
     build: (q) => withFacematch(fewDisclosures(q), "strict"),
   },
-  regularSalted: {
-    id: "regular-salted",
-    label: "Regular · few disclosures · salted",
+  fastSalted: {
+    id: "fast-salted",
+    label: "Fast · few disclosures · salted",
     description: "Fast proof, a few disclosures, salted nullifier + strict facematch.",
     purpose: "Disclose a few attributes",
     mode: "fast",
@@ -163,6 +168,51 @@ export const scenarios: Record<
     description: "Compressed proof, a few disclosures, salted nullifier + strict facematch.",
     purpose: "Disclose a few attributes",
     mode: "compressed",
+    uniqueIdentifierType: SALTED,
+    build: (q) => withFacematch(fewDisclosures(q)),
+  },
+  evmAge: {
+    id: "evm-age",
+    label: "EVM · age ≥ 18 · non-salted",
+    description:
+      "Compressed EVM proof, age over 18 check, default nullifier (on-chain verified).",
+    purpose: "Verify you are over 18",
+    mode: "compressed-evm",
+    build: (q) => q.gte("age", 18),
+  },
+  evmAllDefault: {
+    id: "evm-all-default",
+    label: "EVM · all disclosures · non-salted",
+    description: "Compressed EVM proof, all disclosures, default nullifier.",
+    purpose: "Disclose all document attributes",
+    mode: "compressed-evm",
+    build: allDisclosures,
+  },
+  evmFacematchRegular: {
+    id: "evm-facematch-regular",
+    label: "EVM · few disclosures · regular facematch · non-salted",
+    description:
+      "Compressed EVM proof, a few disclosures, regular (non-strict) facematch, default nullifier.",
+    purpose: "Disclose a few attributes and match your face",
+    mode: "compressed-evm",
+    build: (q) => withFacematch(fewDisclosures(q), "regular"),
+  },
+  evmFacematchStrict: {
+    id: "evm-facematch-strict",
+    label: "EVM · few disclosures · strict facematch · non-salted",
+    description:
+      "Compressed EVM proof, a few disclosures, strict facematch, default nullifier.",
+    purpose: "Disclose a few attributes and match your face",
+    mode: "compressed-evm",
+    build: (q) => withFacematch(fewDisclosures(q), "strict"),
+  },
+  evmSalted: {
+    id: "evm-salted",
+    label: "EVM · few disclosures · salted",
+    description:
+      "Compressed EVM proof, a few disclosures, salted nullifier + strict facematch.",
+    purpose: "Disclose a few attributes",
+    mode: "compressed-evm",
     uniqueIdentifierType: SALTED,
     build: (q) => withFacematch(fewDisclosures(q)),
   },

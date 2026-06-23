@@ -6,24 +6,22 @@ import {
   type QueryBuilder,
   type ProofResult,
   type QueryResult,
-  type Query,
-  type ProofMode,
   type NullifierType,
   type QueryResultErrors,
 } from "@zkpassport/sdk-v14";
+import type { Scenario } from "../test-scenarios";
 
 /**
  * The payload we hand back to the page once the user finishes the flow.
  *
  * Note: SDK 0.14's `onResult` does *not* include the proofs (unlike the
  * `@zkpassport/ui` component released with 0.15). We collect them ourselves
- * from `onProofGenerated` and bundle them — together with the `query` object —
- * in here so the page can POST them to `/api/register` for verification.
+ * from `onProofGenerated` and bundle them in here so the page can POST them to
+ * `/api/register` for verification.
  */
 export type RawResult = {
   result: QueryResult;
   proofs: ProofResult[];
-  query: Query;
   uniqueIdentifier: string | undefined;
   uniqueIdentifierType: NullifierType | undefined;
   verified: boolean;
@@ -31,24 +29,8 @@ export type RawResult = {
 };
 
 type Props = {
-  /** Use-case scope (drives the nullifier). */
-  scope: string;
-  /** Service name shown in the mobile app. */
-  name?: string;
-  /** Purpose explanation shown to the user. */
-  purpose: string;
-  /** Proof mode: "fast" / "compressed". */
-  mode: ProofMode;
+  scenario: Scenario;
   devMode: boolean;
-  /** Salted (1) / non-salted (0) nullifier. Leave undefined for the default. */
-  uniqueIdentifierType?: number;
-  /**
-   * Compose the query. Receives the SDK 0.14 QueryBuilder — chain your
-   * `.disclose()/.gte()/.facematch()` calls and return it; `.done()` is called
-   * for you. This is the seam that lets the page pass either a preconfigured
-   * scenario's `build` or a hand-written manual query.
-   */
-  query: (queryBuilder: QueryBuilder) => QueryBuilder;
   onResult: (payload: RawResult) => void | Promise<void>;
 };
 
@@ -93,31 +75,18 @@ const PHASE_ORDER: Record<Phase, number> = {
  * progress + verification result ourselves (what the UI component does for us).
  *
  * Remount this component (via a `key`) to generate a fresh request — that's
- * how the page regenerates the QR when the scenario, manual query, or devMode
- * changes.
+ * how the page regenerates the QR when the scenario or devMode changes.
  */
-export function RawZKPassportQRCode({
-  scope,
-  name,
-  purpose,
-  mode,
-  devMode,
-  uniqueIdentifierType,
-  query,
-  onResult,
-}: Props) {
+export function RawZKPassportQRCode({ scenario, devMode, onResult }: Props) {
   const [url, setUrl] = useState("");
   const [phase, setPhase] = useState<Phase>("preparing");
   const [proofCount, setProofCount] = useState(0);
   const [verified, setVerified] = useState<boolean | undefined>(undefined);
   const [error, setError] = useState<string | null>(null);
 
-  // Latest callbacks/query without retriggering the effect (effect runs once
-  // per mount; the page forces a fresh mount via `key`).
+  // Latest onResult without retriggering the effect (effect runs once per mount).
   const onResultRef = useRef(onResult);
   onResultRef.current = onResult;
-  const queryRef = useRef(query);
-  queryRef.current = query;
 
   useEffect(() => {
     let cancelled = false;
@@ -131,28 +100,34 @@ export function RawZKPassportQRCode({
         zkPassport = new ZKPassport(window.location.hostname);
 
         const queryBuilder = await zkPassport.request({
-          name: name ?? "Your App",
+          name: "Your App",
           // `logo` is a required string in 0.14's request(); point it at our favicon.
           logo: `${window.location.origin}/favicon.ico`,
-          purpose,
-          scope,
-          mode,
+          purpose: scenario.purpose,
+          scope: scenario.id,
+          mode: scenario.mode,
           devMode,
-          uniqueIdentifierType: uniqueIdentifierType as never,
+          uniqueIdentifierType: scenario.uniqueIdentifierType as never,
         });
         if (cancelled) return;
+
+        // The scenario's `build` is typed against the QueryBuilder bundled with
+        // @zkpassport/ui; structurally it's the same chainable builder, so we
+        // cast it onto the SDK 0.14 builder we actually hold here.
+        const built = scenario.build(
+          queryBuilder as never,
+        ) as unknown as QueryBuilder;
 
         const {
           url,
           requestId: id,
-          query: builtQuery,
           onRequestReceived,
           onGeneratingProof,
           onProofGenerated,
           onResult: onSdkResult,
           onReject,
           onError,
-        } = queryRef.current(queryBuilder).done();
+        } = built.done();
 
         requestId = id;
         setUrl(url);
@@ -168,7 +143,7 @@ export function RawZKPassportQRCode({
         onSdkResult((response) => {
           setVerified(response.verified);
           setPhase("result");
-          void onResultRef.current({ ...response, proofs, query: builtQuery });
+          void onResultRef.current({ ...response, proofs });
         });
         onReject(() => setPhase("rejected"));
         onError((err) => {

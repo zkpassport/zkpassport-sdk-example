@@ -5,7 +5,7 @@ import { scenarios } from "./test-scenarios";
 
 const scenarioList = Object.values(scenarios);
 const modeGroups = [
-  { mode: "fast", label: "Regular" },
+  { mode: "fast", label: "Fast" },
   { mode: "compressed", label: "Compressed" },
 ] as const;
 

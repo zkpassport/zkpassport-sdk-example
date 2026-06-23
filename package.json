@@ -11,8 +11,8 @@
   },
   "dependencies": {
     "@zkpassport/sdk-v14": "npm:@zkpassport/sdk@^0.14.2",
-    "@zkpassport/sdk-v15": "npm:@zkpassport/sdk@^0.15.1",
-    "@zkpassport/ui": "0.15.2",
+    "@zkpassport/sdk-v15": "npm:@zkpassport/sdk@^0.15.4",
+    "@zkpassport/ui": "0.15.6",
     "next": "15.3.9",
     "react": "19.0.0",
     "react-dom": "19.0.0",

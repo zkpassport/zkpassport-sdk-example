@@ -1,49 +1,79 @@
 "use client";
 import { useState } from "react";
 import { createPublicClient, http } from "viem";
-import { sepolia } from "viem/chains";
+import { mainnet, sepolia } from "viem/chains";
 import { ZKPassportQRCode } from "@zkpassport/ui/react";
+import { scenarios } from "../test-scenarios";
+
+const scenarioList = Object.values(scenarios).filter(
+  (s) => s.mode === "compressed-evm",
+);
+const modeGroups = [{ mode: "compressed-evm", label: "EVM" }] as const;
 
 export default function Home() {
+  const [scenario, setScenario] = useState(scenarioList[0]);
+  const [devMode, setDevMode] = useState(true);
   const [isOver18, setIsOver18] = useState<boolean | undefined>(undefined);
   const [uniqueIdentifier, setUniqueIdentifier] = useState("");
   const [onChainVerified, setOnChainVerified] = useState<boolean | undefined>(
     undefined,
   );
 
+  const selectScenario = (next: (typeof scenarioList)[number]) => {
+    setScenario(next);
+    setIsOver18(undefined);
+    setUniqueIdentifier("");
+    setOnChainVerified(undefined);
+  };
+
   return (
     <main
       className="w-full h-full flex flex-col items-center p-10"
       style={{ backgroundColor: "#f1f1f1", height: "100vh" }}
     >
+      {/* Dev controls */}
+      <div className="mb-6 flex items-center gap-3 text-xs text-gray-600">
+        <select
+          className="border border-gray-300 px-1 py-0.5"
+          value={scenario.id}
+          onChange={(e) =>
+            selectScenario(
+              scenarioList.find((s) => s.id === e.target.value) ?? scenario,
+            )
+          }
+        >
+          {modeGroups.map((g) => (
+            <optgroup key={g.mode} label={g.label}>
+              {scenarioList
+                .filter((s) => s.mode === g.mode)
+                .map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.label}
+                  </option>
+                ))}
+            </optgroup>
+          ))}
+        </select>
+        <label className="flex items-center gap-1">
+          <input
+            type="checkbox"
+            checked={devMode}
+            onChange={(e) => setDevMode(e.target.checked)}
+          />
+          devMode
+        </label>
+      </div>
+
       <ZKPassportQRCode
-        scope="age-check"
-        name="Your app"
-        purpose="Verify you are over 18"
-        mode="compressed-evm"
-        devMode={true}
-        query={(queryBuilder) =>
-          queryBuilder
-            // .disclose("firstname")
-            // .disclose("lastname")
-            // .disclose("document_type")
-            // .disclose("document_number")
-            // .disclose("fullname")
-            // .disclose("gender")
-            // .gte("expiry_date", new Date("2025-01-01"))
-            .gte("age", 18)
-            // .lte("age", 99)
-            // .out("issuing_country", ["AFG"])
-            // .in("issuing_country", ["Zero Knowledge Republic"])
-            // .facematch("regular")
-            // .sanctions("all")
-            // .in("nationality", ["Zero Knowledge Republic"])
-            // .out("nationality", ["AFG"])
-            // .bind("user_address", "0x5e4B11F7B7995F5Cee0134692a422b045091112F")
-            // .bind("chain", "ethereum_sepolia")
-            // .bind("custom_data", "email:test@test.com,customer_id:1234567890")
-            .done()
-        }
+        // `key` fully regenerates the QR whenever the scenario or devMode changes.
+        key={`${scenario.id}:${devMode}`}
+        scope={scenario.id}
+        name="Your App"
+        purpose={scenario.purpose}
+        mode={scenario.mode}
+        devMode={devMode}
+        uniqueIdentifierType={scenario.uniqueIdentifierType}
+        query={(queryBuilder) => scenario.build(queryBuilder).done()}
         onResult={async ({
           result,
           uniqueIdentifier,
@@ -57,23 +87,34 @@ export default function Home() {
           setIsOver18(result?.age?.gte?.result);
           console.log(
             "Birthdate",
-            result?.birthdate?.disclose?.result.toDateString(),
+            result?.birthdate?.disclose?.result?.toDateString(),
           );
           setUniqueIdentifier(uniqueIdentifier || "");
           try {
             const params = sdkInstance.getSolidityVerifierParameters({
               proof: proofs[0],
-              scope: "adult",
-              devMode: true,
+              scope: scenario.id,
+              devMode,
             });
 
             const { address, abi, functionName } =
               sdkInstance.getSolidityVerifierDetails();
 
-            const publicClient = createPublicClient({
-              chain: sepolia,
-              transport: http("https://ethereum-sepolia-rpc.publicnode.com"),
-            });
+            // The verifier contract lives at the same address on every chain
+            // (CREATE2), but the registered certificate-registry root differs
+            // per environment: real passports (devMode off) chain to the
+            // mainnet root, mock passports (devMode on) to the Sepolia testnet
+            // root. Submitting a proof to the wrong chain reverts with
+            // "Invalid certificate registry root".
+            const publicClient = devMode
+              ? createPublicClient({
+                  chain: sepolia,
+                  transport: http("https://ethereum-sepolia-rpc.publicnode.com"),
+                })
+              : createPublicClient({
+                  chain: mainnet,
+                  transport: http("https://ethereum-rpc.publicnode.com"),
+                });
 
             // Use the public client to call the verify function of the ZKPassport verifier contract
             const contractCallResult = await publicClient.readContract({
@@ -94,8 +135,37 @@ export default function Home() {
               : "";
             console.log("Unique identifier", uniqueIdentifier);
             setOnChainVerified(isVerified);
+
+            if (!isVerified) {
+              console.warn(
+                "[evm] On-chain verification FAILED — proof not verified",
+                {
+                  scenario: scenario.id,
+                  mode: scenario.mode,
+                  devMode,
+                  scope: scenario.id,
+                  verifierAddress: address,
+                  functionName,
+                  contractCallResult,
+                  queryResultErrors,
+                  hasProof: Boolean(proofs?.[0]),
+                  proofCount: proofs?.length ?? 0,
+                },
+              );
+            }
           } catch (error) {
-            console.error("Error preparing verification:", error);
+            // The proof could not even be submitted for verification (param
+            // generation or the on-chain read failed).
+            setOnChainVerified(false);
+            console.error("[evm] Error during on-chain verification:", error, {
+              scenario: scenario.id,
+              mode: scenario.mode,
+              devMode,
+              scope: scenario.id,
+              queryResultErrors,
+              hasProof: Boolean(proofs?.[0]),
+              proofCount: proofs?.length ?? 0,
+            });
           }
         }}
       />
