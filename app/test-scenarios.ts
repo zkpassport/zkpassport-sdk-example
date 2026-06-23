@@ -14,8 +14,9 @@ type ProofMode = NonNullable<QRProps["mode"]>;
  * A predefined test scenario for the ZKPassport flow.
  *
  * Each scenario bundles everything that varies between tests so you can flip
- * between them from the dropdown in `page.tsx`. Add a new test by adding one
- * entry to the `scenarios` object below.
+ * between them from the scenario list on the preconfigured-scenarios pages
+ * (`/scenarios` and `/scenarios/v14`). Add a new test by adding one entry to
+ * the `scenarios` object below.
  */
 export type Scenario = {
   /** Stable id, also used as the request scope and to force a fresh QR on switch. */

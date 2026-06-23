@@ -9,7 +9,7 @@ import {
   type NullifierType,
   type QueryResultErrors,
 } from "@zkpassport/sdk-v14";
-import type { Scenario } from "../test-scenarios";
+import type { Scenario } from "../../test-scenarios";
 
 /**
  * The payload we hand back to the page once the user finishes the flow.
