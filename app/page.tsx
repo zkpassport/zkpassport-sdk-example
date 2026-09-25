@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { ZKPassportQRCode } from "@zkpassport/ui/react";
+import { VerifyWithZKPassport } from "@zkpassport/ui/react-button";
 
 export default function Home() {
   const [isOver18, setIsOver18] = useState<boolean | undefined>(undefined);
@@ -12,7 +12,7 @@ export default function Home() {
       className="w-full h-full flex flex-col items-center p-10"
       style={{ backgroundColor: "#f1f1f1", height: "100vh" }}
     >
-      <ZKPassportQRCode
+      <VerifyWithZKPassport
         scope="age-check"
         name="Your App"
         purpose="Verify you are over 18"
@@ -40,39 +40,25 @@ export default function Home() {
             // .bind("custom_data", "email:test@test.com,customer_id:1234567890")
             .done()
         }
-        onResult={async ({
-          result,
-          uniqueIdentifier,
-          uniqueIdentifierType,
-          verified,
-          queryResultErrors,
-          proofs,
-        }) => {
+        onSuccess={async ({ proofs, result }) => {
           console.log("Proofs", proofs);
           console.log("Result of the query", result);
-          console.log("Query result errors", queryResultErrors);
           setIsOver18(result?.age?.gte?.result);
           console.log(
             "Birthdate",
             result?.birthdate?.disclose?.result.toDateString(),
           );
-          setUniqueIdentifier(
-            uniqueIdentifier
-              ? `${uniqueIdentifier} (Type: ${uniqueIdentifierType})`
-              : "",
-          );
-          setVerified(verified);
 
           const res = await fetch("/api/register", {
             method: "POST",
-            body: JSON.stringify({
-              queryResult: result,
-              proofs,
-              domain: window.location.hostname,
-            }),
+            body: JSON.stringify({ proofs, result }),
           });
+          const verification = await res.json();
 
-          console.log("Response from the server", await res.json());
+          console.log("Response from the server", verification);
+          setUniqueIdentifier(verification.uniqueIdentifier ?? "");
+          setVerified(verification.verified);
+          return verification.verified;
         }}
       />
       <br />

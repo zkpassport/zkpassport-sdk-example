@@ -2,7 +2,8 @@
 import { useState } from "react";
 import { createPublicClient, http } from "viem";
 import { sepolia } from "viem/chains";
-import { ZKPassportQRCode } from "@zkpassport/ui/react";
+import { ZKPassport } from "@zkpassport/sdk";
+import { VerifyWithZKPassport } from "@zkpassport/ui/react-button";
 
 export default function Home() {
   const [isOver18, setIsOver18] = useState<boolean | undefined>(undefined);
@@ -16,7 +17,7 @@ export default function Home() {
       className="w-full h-full flex flex-col items-center p-10"
       style={{ backgroundColor: "#f1f1f1", height: "100vh" }}
     >
-      <ZKPassportQRCode
+      <VerifyWithZKPassport
         scope="age-check"
         name="Your app"
         purpose="Verify you are over 18"
@@ -44,31 +45,24 @@ export default function Home() {
             // .bind("custom_data", "email:test@test.com,customer_id:1234567890")
             .done()
         }
-        onResult={async ({
-          result,
-          uniqueIdentifier,
-          queryResultErrors,
-          proofs,
-          sdkInstance,
-        }) => {
+        onSuccess={async ({ proofs, result }) => {
           console.log("Proofs", proofs);
           console.log("Result of the query", result);
-          console.log("Query result errors", queryResultErrors);
           setIsOver18(result?.age?.gte?.result);
           console.log(
             "Birthdate",
             result?.birthdate?.disclose?.result.toDateString(),
           );
-          setUniqueIdentifier(uniqueIdentifier || "");
           try {
-            const params = sdkInstance.getSolidityVerifierParameters({
+            const zkpassport = new ZKPassport(window.location.hostname);
+            const params = zkpassport.getSolidityVerifierParameters({
               proof: proofs[0],
-              scope: "adult",
+              scope: "age-check",
               devMode: true,
             });
 
             const { address, abi, functionName } =
-              sdkInstance.getSolidityVerifierDetails();
+              zkpassport.getSolidityVerifierDetails();
 
             const publicClient = createPublicClient({
               chain: sepolia,
@@ -93,9 +87,12 @@ export default function Home() {
               ? String(contractCallResult[1])
               : "";
             console.log("Unique identifier", uniqueIdentifier);
+            setUniqueIdentifier(uniqueIdentifier);
             setOnChainVerified(isVerified);
+            return isVerified;
           } catch (error) {
             console.error("Error preparing verification:", error);
+            return false;
           }
         }}
       />

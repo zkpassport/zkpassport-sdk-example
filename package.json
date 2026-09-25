@@ -11,10 +11,10 @@
   },
   "dependencies": {
     "next": "15.3.9",
-    "@zkpassport/ui": "0.15.2",
+    "@zkpassport/sdk": "0.17.1",
+    "@zkpassport/ui": "0.17.1",
     "react": "19.0.0",
     "react-dom": "19.0.0",
-    "react-qr-code": "^2.0.15",
     "viem": "^2.27.0"
   },
   "devDependencies": {
