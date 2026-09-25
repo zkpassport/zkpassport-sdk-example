@@ -4,6 +4,7 @@ import { VerifyWithZKPassport } from "@zkpassport/ui/react-button";
 
 export default function Home() {
   const [isOver18, setIsOver18] = useState<boolean | undefined>(undefined);
+  const [firstName, setFirstName] = useState("");
   const [uniqueIdentifier, setUniqueIdentifier] = useState("");
   const [verified, setVerified] = useState<boolean | undefined>(undefined);
 
@@ -20,7 +21,7 @@ export default function Home() {
         devMode={true}
         query={(queryBuilder) =>
           queryBuilder
-            // .disclose("firstname")
+            .disclose("firstname")
             // .disclose("lastname")
             // .disclose("document_type")
             // .disclose("document_number")
@@ -44,6 +45,7 @@ export default function Home() {
           console.log("Proofs", proofs);
           console.log("Result of the query", result);
           setIsOver18(result?.age?.gte?.result);
+          setFirstName(result?.firstname?.disclose?.result ?? "");
           console.log(
             "Birthdate",
             result?.birthdate?.disclose?.result.toDateString(),
@@ -69,6 +71,11 @@ export default function Home() {
       {typeof isOver18 === "boolean" && (
         <p className="mt-2">
           <b>Is over 18:</b> {isOver18 ? "Yes" : "No"}
+        </p>
+      )}
+      {firstName && (
+        <p className="mt-2">
+          <b>First name:</b> {firstName}
         </p>
       )}
       {uniqueIdentifier && (

@@ -13,7 +13,11 @@ export async function POST(request: Request) {
   const zkpassport = new ZKPassport(request.headers.get("host") ?? undefined);
 
   // Recreate the query to enforce the right conditions were checked by the app
-  const { query } = zkpassport.createQuery().gte("age", 18).done();
+  const { query } = zkpassport
+    .createQuery()
+    .disclose("firstname")
+    .gte("age", 18)
+    .done();
 
   const { verified, uniqueIdentifier } = await zkpassport.verify({
     proofs,
