@@ -14,33 +14,16 @@ export default function Home() {
       style={{ backgroundColor: "#f1f1f1", height: "100vh" }}
     >
       <VerifyWithZKPassport
-        scope="age-check"
-        name="Your App"
         purpose="Verify you are over 18"
         mode="fast"
-        devMode={true}
-        query={(queryBuilder) =>
-          queryBuilder
-            .disclose("firstname")
-            // .disclose("lastname")
-            // .disclose("document_type")
-            // .disclose("document_number")
-            // .disclose("fullname")
-            // .disclose("gender")
-            // .gte("expiry_date", new Date("2025-01-01"))
-            .gte("age", 18)
-            // .lte("age", 99)
-            // .out("issuing_country", ["AFG"])
-            // .in("issuing_country", ["Zero Knowledge Republic"])
-            // .facematch("regular")
-            // .sanctions("all")
-            // .in("nationality", ["Zero Knowledge Republic"])
-            // .out("nationality", ["AFG"])
-            // .bind("user_address", "0x5e4B11F7B7995F5Cee0134692a422b045091112F")
-            // .bind("chain", "ethereum_sepolia")
-            // .bind("custom_data", "email:test@test.com,customer_id:1234567890")
-            .done()
-        }
+        service={{ scope: "age-check", devMode: true }}
+        query={{
+          firstname: { disclose: true },
+          age: { min: 18 },
+          // Other fields: lastname/fullname/gender/document_type/document_number: { disclose: true },
+          // nationality/issuing_country: { included/excluded: [...], disclose: true },
+          // sanctions: true, facematch: { mode: "regular" }
+        }}
         onSuccess={async ({ proofs, result }) => {
           console.log("Proofs", proofs);
           console.log("Result of the query", result);
