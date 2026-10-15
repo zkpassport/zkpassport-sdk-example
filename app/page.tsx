@@ -14,50 +14,39 @@ export default function Home() {
       style={{ backgroundColor: "#f1f1f1", height: "100vh" }}
     >
       <VerifyWithZKPassport
-        scope="age-check"
-        name="Your App"
         purpose="Verify you are over 18"
         mode="fast"
-        devMode={true}
-        query={(queryBuilder) =>
-          queryBuilder
-            .disclose("firstname")
-            // .disclose("lastname")
-            // .disclose("document_type")
-            // .disclose("document_number")
-            // .disclose("fullname")
-            // .disclose("gender")
-            // .gte("expiry_date", new Date("2025-01-01"))
-            .gte("age", 18)
-            // .lte("age", 99)
-            // .out("issuing_country", ["AFG"])
-            // .in("issuing_country", ["Zero Knowledge Republic"])
-            // .facematch("regular")
-            // .sanctions("all")
-            // .in("nationality", ["Zero Knowledge Republic"])
-            // .out("nationality", ["AFG"])
-            // .bind("user_address", "0x5e4B11F7B7995F5Cee0134692a422b045091112F")
-            // .bind("chain", "ethereum_sepolia")
-            // .bind("custom_data", "email:test@test.com,customer_id:1234567890")
-            .done()
-        }
+        service={{ scope: "age-check", devMode: true }}
+        query={{
+          age: { min: 18 },
+          firstname: { disclose: true },
+          // lastname: { disclose: true },
+          // fullname: { disclose: true },
+          // gender: { disclose: true },
+          // document_type: { disclose: true },
+          // document_number: { disclose: true },
+          // birthdate: { disclose: true },
+          // expiry_date: { min: new Date("2025-01-01") },
+          // nationality: { included: ["Zero Knowledge Republic"] },
+          // issuing_country: { excluded: ["AFG"] },
+          // facematch: { mode: "regular" },
+          // sanctions: true,
+          // bind: { user_address: "0x5e4B11F7B7995F5Cee0134692a422b045091112F" },
+        }}
         onSuccess={async ({ proofs, result }) => {
           console.log("Proofs", proofs);
           console.log("Result of the query", result);
           setIsOver18(result?.age?.gte?.result);
           setFirstName(result?.firstname?.disclose?.result ?? "");
-          console.log(
-            "Birthdate",
-            result?.birthdate?.disclose?.result.toDateString(),
-          );
 
+          // Always verify the proofs on your backend before trusting the result.
           const res = await fetch("/api/register", {
             method: "POST",
             body: JSON.stringify({ proofs, result }),
           });
           const verification = await res.json();
-
           console.log("Response from the server", verification);
+
           setUniqueIdentifier(verification.uniqueIdentifier ?? "");
           setVerified(verification.verified);
           return verification.verified;

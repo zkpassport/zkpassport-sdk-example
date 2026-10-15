@@ -18,41 +18,19 @@ export default function Home() {
       style={{ backgroundColor: "#f1f1f1", height: "100vh" }}
     >
       <VerifyWithZKPassport
-        scope="age-check"
-        name="Your app"
         purpose="Verify you are over 18"
         mode="compressed-evm"
-        devMode={true}
-        query={(queryBuilder) =>
-          queryBuilder
-            // .disclose("firstname")
-            // .disclose("lastname")
-            // .disclose("document_type")
-            // .disclose("document_number")
-            // .disclose("fullname")
-            // .disclose("gender")
-            // .gte("expiry_date", new Date("2025-01-01"))
-            .gte("age", 18)
-            // .lte("age", 99)
-            // .out("issuing_country", ["AFG"])
-            // .in("issuing_country", ["Zero Knowledge Republic"])
-            // .facematch("regular")
-            // .sanctions("all")
-            // .in("nationality", ["Zero Knowledge Republic"])
-            // .out("nationality", ["AFG"])
-            // .bind("user_address", "0x5e4B11F7B7995F5Cee0134692a422b045091112F")
-            // .bind("chain", "ethereum_sepolia")
-            // .bind("custom_data", "email:test@test.com,customer_id:1234567890")
-            .done()
-        }
+        service={{ scope: "age-check", devMode: true }}
+        query={{
+          age: { min: 18 },
+          // firstname: { disclose: true },
+          // nationality: { included: ["Zero Knowledge Republic"] },
+          // facematch: { mode: "regular" },
+        }}
         onSuccess={async ({ proofs, result }) => {
           console.log("Proofs", proofs);
           console.log("Result of the query", result);
           setIsOver18(result?.age?.gte?.result);
-          console.log(
-            "Birthdate",
-            result?.birthdate?.disclose?.result.toDateString(),
-          );
           try {
             const zkpassport = new ZKPassport(window.location.hostname);
             const params = zkpassport.getSolidityVerifierParameters({
@@ -69,7 +47,7 @@ export default function Home() {
               transport: http("https://ethereum-sepolia-rpc.publicnode.com"),
             });
 
-            // Use the public client to call the verify function of the ZKPassport verifier contract
+            // Call the verify function of the ZKPassport verifier contract
             const contractCallResult = await publicClient.readContract({
               address,
               abi,
@@ -78,20 +56,19 @@ export default function Home() {
             });
 
             console.log("Contract call result", contractCallResult);
-            // The result is an array with the first element being a boolean indicating if the proof is valid
-            // and the second element being the unique identifier
+            // The result is a tuple: [isValid, uniqueIdentifier]
             const isVerified = Array.isArray(contractCallResult)
               ? Boolean(contractCallResult[0])
               : false;
-            const uniqueIdentifier = Array.isArray(contractCallResult)
+            const identifier = Array.isArray(contractCallResult)
               ? String(contractCallResult[1])
               : "";
-            console.log("Unique identifier", uniqueIdentifier);
-            setUniqueIdentifier(uniqueIdentifier);
+            console.log("Unique identifier", identifier);
+            setUniqueIdentifier(identifier);
             setOnChainVerified(isVerified);
             return isVerified;
           } catch (error) {
-            console.error("Error preparing verification:", error);
+            console.error("Error verifying on chain:", error);
             return false;
           }
         }}
