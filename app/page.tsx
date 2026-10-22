@@ -1,6 +1,10 @@
 "use client";
 import { useState } from "react";
-import { VerifyWithZKPassport } from "@zkpassport/ui/react-button";
+import {
+  CredentialScheme,
+  CredentialTier,
+  VerifyWithZKPassport,
+} from "@zkpassport/ui/react-button";
 
 export default function Home() {
   const [isOver18, setIsOver18] = useState<boolean | undefined>(undefined);
@@ -16,7 +20,19 @@ export default function Home() {
       <VerifyWithZKPassport
         purpose="Verify you are over 18"
         mode="fast"
-        service={{ scope: "age-check", devMode: true }}
+        service={{
+          scope: "age-check",
+          devMode: true,
+          // Which credentials to accept: any government-signed ID, plus a passport read by
+          // camera and attested on iOS. Unset accepts signed IDs only.
+          allowedCredentials: [
+            CredentialTier.GOVERNMENT_SIGNED,
+            CredentialScheme.ATTESTED_CAPTURE_IOS,
+          ],
+        }}
+        // A popup served locally (`bun run dev` in verify-popup), for example to verify against
+        // circuits that are not published yet; unset uses verify.zkpassport.id
+        overrides={{ popupUrl: process.env.NEXT_PUBLIC_ZKPASSPORT_POPUP_URL }}
         query={{
           age: { min: 18 },
           firstname: { disclose: true },
