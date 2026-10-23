@@ -14,7 +14,7 @@ declare global {
 }
 
 // Override with NEXT_PUBLIC_ZKPASSPORT_UI_SCRIPT to test a local build, e.g. /ui.js from public/
-const SCRIPT_URL = process.env.NEXT_PUBLIC_ZKPASSPORT_UI_SCRIPT ?? "https://cdn.zkpassport.id/ui/v0/ui.js";
+const SCRIPT_URL = process.env.NEXT_PUBLIC_ZKPASSPORT_UI_SCRIPT ?? "https://cdn.zkpassport.id/ui/v1/ui.js";
 
 export default function Vanilla() {
   const container = useRef<HTMLDivElement>(null);

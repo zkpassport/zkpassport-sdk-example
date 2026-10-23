@@ -18,7 +18,7 @@ This example demonstrates how to use the ZKPassport SDK for verifying passports 
 
 - `/` renders the button with the React component from `@zkpassport/ui/react-button`.
 - `/evm` does the same for an on-chain verification.
-- `/vanilla` loads the button from the CDN script (`https://cdn.zkpassport.id/ui/v0/ui.js`) and renders it with `VerifyWithZKPassport.render`, the way a page without a bundler would. To try a local build of `@zkpassport/ui` instead, copy its `dist/ui.js` into `public/` and point the page at it:
+- `/vanilla` loads the button from the CDN script (`https://cdn.zkpassport.id/ui/v1/ui.js`) and renders it with `VerifyWithZKPassport.render`, the way a page without a bundler would. To try a local build of `@zkpassport/ui` instead, copy its `dist/ui.js` into `public/` and point the page at it:
 
   ```
   cp ../zkpassport-packages/packages/zkpassport-ui/dist/ui.js public/ui.js
