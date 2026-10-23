@@ -78,6 +78,11 @@ export default function Home() {
           <b>Verified:</b> {verified ? "Yes" : "No"}
         </p>
       )}
+      <p className="mt-10 text-sm">
+        <a className="underline" href="/vanilla">
+          Script-tag version of this page
+        </a>
+      </p>
     </main>
   );
 }
