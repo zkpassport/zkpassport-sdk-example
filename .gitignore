@@ -39,5 +39,3 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# local build of @zkpassport/ui for /vanilla
-/public/ui.js

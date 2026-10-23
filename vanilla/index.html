@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ZKPassport script-tag example</title>
+    <style>
+      body { font-family: system-ui, sans-serif; background: #f1f1f1; margin: 0; padding: 40px; display: flex; flex-direction: column; align-items: center; gap: 24px; }
+      #result p { margin: 4px 0; }
+    </style>
+  </head>
+  <body>
+    <div id="zkpassport"></div>
+    <div id="result"></div>
+
+    <script src="https://cdn.zkpassport.id/ui/v1.js"></script>
+    <script>
+      VerifyWithZKPassport.render("#zkpassport", {
+        purpose: "Verify you are over 18",
+        service: { scope: "age-check", devMode: true },
+        query: { age: { min: 18 }, firstname: { disclose: true } },
+        onSuccess: ({ proofs, result }) => {
+          console.log("Proofs", proofs);
+          console.log("Result of the query", result);
+          document.getElementById("result").innerHTML = `
+            <p><b>Is over 18:</b> ${result.age?.gte?.result ? "Yes" : "No"}</p>
+            <p><b>First name:</b> ${result.firstname?.disclose?.result ?? ""}</p>
+          `;
+          // In a real app, send the proofs to your server and verify them there before trusting the result
+        },
+        onError: (error) => {
+          if (!error.cancelled) console.error(error);
+        },
+      });
+    </script>
+  </body>
+</html>

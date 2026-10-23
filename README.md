@@ -16,14 +16,16 @@ This example demonstrates how to use the ZKPassport SDK for verifying passports 
 
 ## Pages
 
-- `/` renders the button with the React component from `@zkpassport/ui/react-button`.
+- `/` renders the button with the React component from `@zkpassport/ui/react-button` and verifies the proofs in `/api/register`.
 - `/evm` does the same for an on-chain verification.
-- `/vanilla` loads the button from the CDN script (`https://cdn.zkpassport.id/ui/v1.js`) and renders it with `VerifyWithZKPassport.render`, the way a page without a bundler would. To try a local build of `@zkpassport/ui` instead, copy its `dist/ui.js` into `public/` and point the page at it:
 
-  ```
-  cp ../zkpassport-packages/packages/zkpassport-ui/dist/ui.js public/ui.js
-  NEXT_PUBLIC_ZKPASSPORT_UI_SCRIPT=/ui.js npm run dev
-  ```
+## Script-tag example
+
+`vanilla/index.html` is a plain HTML page with no bundler and no backend: it loads the button from the CDN and renders it with `VerifyWithZKPassport.render`. The popup needs a real origin, so serve the folder rather than opening the file directly:
+
+```
+npx serve vanilla
+```
 
 ## Next.js App Structure
 
