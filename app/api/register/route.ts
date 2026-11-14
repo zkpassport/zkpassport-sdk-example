@@ -31,7 +31,6 @@ export async function POST(request: Request) {
   const {
     verified,
     uniqueIdentifier,
-    credentialTier,
     credentialScheme,
     queryResultErrors,
   } = await zkpassport.verify({
@@ -46,15 +45,19 @@ export async function POST(request: Request) {
       CredentialScheme.ATTESTED_CAPTURE_IOS,
     ],
     // Verify against locally packaged circuits, served from the circuits repo with
-    // `npm run serve-circuits`; the app must prove with the same server
+    // `npm run serve-circuits`; the app must prove with the same server. Its certificates.json,
+    // when there is one, is accepted as the certificate root (dev mode only).
     config: process.env.ZKPASSPORT_CIRCUITS_URL
-      ? { circuitsUrl: process.env.ZKPASSPORT_CIRCUITS_URL }
+      ? {
+          circuitsUrl: process.env.ZKPASSPORT_CIRCUITS_URL,
+          certificatesUrl: `${process.env.ZKPASSPORT_CIRCUITS_URL}/certificates.json`,
+        }
       : undefined,
   });
 
   console.log("Verified", verified);
   console.log("Unique identifier", uniqueIdentifier);
-  console.log("Credential tier", credentialTier, "scheme", credentialScheme);
+  console.log("Credential scheme", credentialScheme);
   if (!verified) {
     console.log(
       "Verification errors",
