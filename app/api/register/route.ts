@@ -45,8 +45,7 @@ export async function POST(request: Request) {
       CredentialScheme.ATTESTED_CAPTURE_IOS,
     ],
     // Verify against locally packaged circuits, served from the circuits repo with
-    // `npm run serve-circuits`; the app must prove with the same server. Its certificates.json,
-    // when there is one, is accepted as the certificate root (dev mode only).
+    // `npm run serve-circuits`; the app must prove with the same server.
     config: process.env.ZKPASSPORT_CIRCUITS_URL
       ? {
           circuitsUrl: process.env.ZKPASSPORT_CIRCUITS_URL,
