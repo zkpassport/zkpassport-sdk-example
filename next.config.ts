@@ -1,10 +1,15 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  serverExternalPackages: ["@aztec/bb.js"],
+  serverExternalPackages: ["@aztec/bb.js", "@aztec-foundation/bb.js"],
   outputFileTracingIncludes: {
     // Update the route to the one where you need to verify ZKPassport proof
-    '/api/register': ["./node_modules/@aztec/bb.js/dest/node/**/*", "./node_modules/@aztec/bb.js/dest/node-cjs/**/*"],
+    '/api/register': [
+      "./node_modules/@aztec/bb.js/dest/node/**/*",
+      "./node_modules/@aztec/bb.js/dest/node-cjs/**/*",
+      "./node_modules/@aztec-foundation/bb.js/dest/node/**/*",
+      "./node_modules/@aztec-foundation/bb.js/dest/node-cjs/**/*",
+    ],
   },
 };
 
