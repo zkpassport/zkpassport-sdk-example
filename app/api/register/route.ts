@@ -71,7 +71,6 @@ export async function POST(request: Request) {
   return Response.json({
     verified,
     uniqueIdentifier,
-    credentialTier,
     credentialScheme,
   });
 }
