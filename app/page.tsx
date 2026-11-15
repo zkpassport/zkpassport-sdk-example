@@ -1,8 +1,8 @@
 "use client";
 import { useState } from "react";
 import {
-  CredentialScheme,
-  CredentialTier,
+  VerificationMethod,
+  VerificationTier,
   VerifyWithZKPassport,
 } from "@zkpassport/ui/react-button";
 
@@ -23,11 +23,11 @@ export default function Home() {
         service={{
           scope: "age-check",
           devMode: true,
-          // Which credentials to accept: any government-signed ID, plus a passport read by
+          // Which verification methods to accept: any government-signed ID, plus a passport read by
           // camera and attested on iOS. Unset accepts signed IDs only.
-          allowedCredentials: [
-            CredentialTier.GOVERNMENT_SIGNED,
-            CredentialScheme.ATTESTED_CAPTURE_IOS,
+          allowedVerificationMethods: [
+            VerificationTier.GOVERNMENT_SIGNED,
+            VerificationMethod.ATTESTED_CAPTURE_IOS,
           ],
         }}
         // A popup served locally (`bun run dev` in verify-popup), for example to verify against

@@ -1,6 +1,6 @@
 import {
-  CredentialScheme,
-  CredentialTier,
+  VerificationMethod,
+  VerificationTier,
   ProofResult,
   QueryResult,
   ZKPassport,
@@ -31,7 +31,7 @@ export async function POST(request: Request) {
   const {
     verified,
     uniqueIdentifier,
-    credentialScheme,
+    verificationMethod,
     queryResultErrors,
   } = await zkpassport.verify({
     proofs,
@@ -40,9 +40,9 @@ export async function POST(request: Request) {
     scope: "age-check",
     devMode: true,
     // Must match what the page asked for, or an attested proof is refused here
-    allowedCredentials: [
-      CredentialTier.GOVERNMENT_SIGNED,
-      CredentialScheme.ATTESTED_CAPTURE_IOS,
+    allowedVerificationMethods: [
+      VerificationTier.GOVERNMENT_SIGNED,
+      VerificationMethod.ATTESTED_CAPTURE_IOS,
     ],
     // Verify against locally packaged circuits, served from the circuits repo with
     // `npm run serve-circuits`; the app must prove with the same server.
@@ -56,7 +56,7 @@ export async function POST(request: Request) {
 
   console.log("Verified", verified);
   console.log("Unique identifier", uniqueIdentifier);
-  console.log("Credential scheme", credentialScheme);
+  console.log("Verification method", verificationMethod);
   if (!verified) {
     console.log(
       "Verification errors",
@@ -70,6 +70,6 @@ export async function POST(request: Request) {
   return Response.json({
     verified,
     uniqueIdentifier,
-    credentialScheme,
+    verificationMethod,
   });
 }
