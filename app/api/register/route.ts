@@ -45,12 +45,9 @@ export async function POST(request: Request) {
       VerificationMethod.ATTESTED_CAPTURE_IOS,
     ],
     // Verify against locally packaged circuits, served from the circuits repo with
-    // `npm run serve-circuits`; the app must prove with the same server.
+    // `npm run serve-circuits`; the app must prove with the same server
     config: process.env.ZKPASSPORT_CIRCUITS_URL
-      ? {
-          circuitsUrl: process.env.ZKPASSPORT_CIRCUITS_URL,
-          certificatesUrl: `${process.env.ZKPASSPORT_CIRCUITS_URL}/certificates.json`,
-        }
+      ? { circuitsUrl: process.env.ZKPASSPORT_CIRCUITS_URL }
       : undefined,
   });
 
