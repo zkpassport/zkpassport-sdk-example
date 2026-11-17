@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { VerificationTier } from "@zkpassport/sdk";
 import { VerifyWithZKPassport } from "@zkpassport/ui/react-button";
 
 export default function Home() {
@@ -16,7 +17,15 @@ export default function Home() {
       <VerifyWithZKPassport
         purpose="Verify you are over 18"
         mode="fast"
-        service={{ scope: "age-check", devMode: true }}
+        service={{
+          scope: "age-check",
+          devMode: true,
+          // Accept chip and Aadhaar IDs (tier 1) and IDs read by camera (tier 2)
+          allowedVerificationMethods: [
+            VerificationTier.GOVERNMENT_SIGNED,
+            VerificationTier.DEVICE_ATTESTED,
+          ],
+        }}
         query={{
           age: { min: 18 },
           firstname: { disclose: true },

@@ -17,7 +17,12 @@
     <script>
       VerifyWithZKPassport.render("#zkpassport", {
         purpose: "Verify you are over 18",
-        service: { scope: "age-check", devMode: true },
+        service: {
+          scope: "age-check",
+          devMode: true,
+          // 1: chip and Aadhaar IDs, 2: IDs read by camera
+          allowedVerificationMethods: [1, 2],
+        },
         query: { age: { min: 18 }, firstname: { disclose: true } },
         onSuccess: ({ proofs, result }) => {
           console.log("Proofs", proofs);

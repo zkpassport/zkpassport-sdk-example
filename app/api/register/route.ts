@@ -1,4 +1,4 @@
-import { ProofResult, QueryResult, ZKPassport } from "@zkpassport/sdk";
+import { ProofResult, QueryResult, VerificationTier, ZKPassport } from "@zkpassport/sdk";
 
 export async function POST(request: Request) {
   const {
@@ -25,6 +25,11 @@ export async function POST(request: Request) {
     queryResult: result,
     scope: "age-check",
     devMode: true,
+    // Must match what the request accepted, or verify() refuses tier 2 proofs
+    allowedVerificationMethods: [
+      VerificationTier.GOVERNMENT_SIGNED,
+      VerificationTier.DEVICE_ATTESTED,
+    ],
   });
 
   console.log("Verified", verified);
